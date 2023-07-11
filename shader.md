@@ -642,3 +642,1054 @@ util_queue_thread_func (input=input@entry=0x55555561b3f0) at ../src/util/u_queue
 (gdb) 
 [Switching to Thread 0x7ffff673ed40 (LWP 30894)]
 
+
+
+ void
+  317 st_init_draw_functions(struct dd_function_table *functions)
+  318 {
+  319    functions->Draw = st_draw_vbo;
+  320    functions->DrawIndirect = st_indirect_draw_vbo;
+  321 }
+  322 
+
+
+
+
+ 54  * Swaps the buffers for the current window (if any)
+ 55  */
+ 56 void FGAPIENTRY glutSwapBuffers( void )
+ 57 {
+ 58     FREEGLUT_EXIT_IF_NOT_INITIALISED ( "glutSwapBuffers" );
+ 59     FREEGLUT_EXIT_IF_NO_WINDOW ( "glutSwapBuffers" );
+ 60 
+ 61     /*
+ 62      * "glXSwapBuffers" already performs an implicit call to "glFlush". What
+ 63      * about "SwapBuffers"?
+ 64      */
+ 65     glFlush( );
+ 66     if( ! fgStructure.CurrentWindow->Window.DoubleBuffered )
+ 67         return;
+ 68 
+ 69     fgPlatformGlutSwapBuffers( &fgDisplay.pDisplay, fgStructure.CurrentWindow );
+ 70 
+ 71     /* GLUT_FPS env var support */
+ 72     if( fgState.FPSInterval )
+ 73     {
+ 74         GLint t = glutGet( GLUT_ELAPSED_TIME );
+ 75         fgState.SwapCount++;
+ 76         if( fgState.SwapTime == 0 )
+ 77             fgState.SwapTime = t;
+ 78         else if( t - fgState.SwapTime > fgState.FPSInterval )
+ 79         {
+ 80             float time = 0.001f * ( t - fgState.SwapTime );
+ 81             float fps = ( float )fgState.SwapCount / time;
+ 82             fprintf( stderr,
+ 83                      "freeglut: %d frames in %.2f seconds = %.2f FPS\n",
+ 84                      fgState.SwapCount, time, fps );
+ 85             fgState.SwapTime = t;
+ 86             fgState.SwapCount = 0;
+ 87         }
+ 88     }
+ 89 }
+
+
+
+static const struct debug_named_value debug_options[] = {
+	/* Shader logging options: */
+	{ "vs", DBG(VS), "Print vertex shaders" },
+	{ "ps", DBG(PS), "Print pixel shaders" },
+	{ "gs", DBG(GS), "Print geometry shaders" },
+	{ "tcs", DBG(TCS), "Print tessellation control shaders" },
+	{ "tes", DBG(TES), "Print tessellation evaluation shaders" },
+	{ "cs", DBG(CS), "Print compute shaders" },
+	{ "noir", DBG(NO_IR), "Don't print the LLVM IR"},
+	{ "notgsi", DBG(NO_TGSI), "Don't print the TGSI"},
+	{ "noasm", DBG(NO_ASM), "Don't print disassembled shaders"},
+	{ "preoptir", DBG(PREOPT_IR), "Print the LLVM IR before initial optimizations" },
+
+	/* Shader compiler options the shader cache should be aware of: */
+	{ "unsafemath", DBG(UNSAFE_MATH), "Enable unsafe math shader optimizations" },
+	{ "sisched", DBG(SI_SCHED), "Enable LLVM SI Machine Instruction Scheduler." },
+	{ "gisel", DBG(GISEL), "Enable LLVM global instruction selector." },
+
+	/* Shader compiler options (with no effect on the shader cache): */
+	{ "checkir", DBG(CHECK_IR), "Enable additional sanity checks on shader IR" },
+	{ "nir", DBG(NIR), "Enable experimental NIR shaders" },
+	{ "mono", DBG(MONOLITHIC_SHADERS), "Use old-style monolithic shaders compiled on demand" },
+	{ "nooptvariant", DBG(NO_OPT_VARIANT), "Disable compiling optimized shader variants." },
+
+	/* Information logging options: */
+	{ "info", DBG(INFO), "Print driver information" },
+	{ "tex", DBG(TEX), "Print texture info" },
+	{ "compute", DBG(COMPUTE), "Print compute info" },
+	{ "vm", DBG(VM), "Print virtual addresses when creating resources" },
+
+	/* Driver options: */
+	{ "forcedma", DBG(FORCE_DMA), "Use asynchronous DMA for all operations when possible." },
+	{ "nodma", DBG(NO_ASYNC_DMA), "Disable asynchronous DMA" },
+	{ "nowc", DBG(NO_WC), "Disable GTT write combining" },
+	{ "check_vm", DBG(CHECK_VM), "Check VM faults and dump debug info." },
+	{ "reserve_vmid", DBG(RESERVE_VMID), "Force VMID reservation per context." },
+	{ "zerovram", DBG(ZERO_VRAM), "Clear VRAM allocations." },
+
+	/* 3D engine options: */
+	{ "switch_on_eop", DBG(SWITCH_ON_EOP), "Program WD/IA to switch on end-of-packet." },
+	{ "nooutoforder", DBG(NO_OUT_OF_ORDER), "Disable out-of-order rasterization" },
+	{ "nodpbb", DBG(NO_DPBB), "Disable DPBB." },
+	{ "nodfsm", DBG(NO_DFSM), "Disable DFSM." },
+	{ "dpbb", DBG(DPBB), "Enable DPBB." },
+	{ "dfsm", DBG(DFSM), "Enable DFSM." },
+	{ "nohyperz", DBG(NO_HYPERZ), "Disable Hyper-Z" },
+	{ "norbplus", DBG(NO_RB_PLUS), "Disable RB+." },
+	{ "no2d", DBG(NO_2D_TILING), "Disable 2D tiling" },
+	{ "notiling", DBG(NO_TILING), "Disable tiling" },
+	{ "nodcc", DBG(NO_DCC), "Disable DCC." },
+	{ "nodccclear", DBG(NO_DCC_CLEAR), "Disable DCC fast clear." },
+	{ "nodccfb", DBG(NO_DCC_FB), "Disable separate DCC on the main framebuffer" },
+	{ "nodccmsaa", DBG(NO_DCC_MSAA), "Disable DCC for MSAA" },
+	{ "nofmask", DBG(NO_FMASK), "Disable MSAA compression" },
+
+	/* Tests: */
+	{ "testdma", DBG(TEST_DMA), "Invoke SDMA tests and exit." },
+	{ "testvmfaultcp", DBG(TEST_VMFAULT_CP), "Invoke a CP VM fault test and exit." },
+	{ "testvmfaultsdma", DBG(TEST_VMFAULT_SDMA), "Invoke a SDMA VM fault test and exit." },
+	{ "testvmfaultshader", DBG(TEST_VMFAULT_SHADER), "Invoke a shader VM fault test and exit." },
+	{ "testdmaperf", DBG(TEST_DMA_PERF), "Test DMA performance" },
+	{ "testgds", DBG(TEST_GDS), "Test GDS." },
+
+	DEBUG_NAMED_VALUE_END /* must be last */
+};
+
+
+R600_DEBUG
+
+
+
+	if (debug_get_bool_option("RADEON_DUMP_SHADERS", false))
+		sscreen->debug_flags |= DBG_ALL_SHADERS;
+
+
+*******************
+
+
+(gdb) bt
+#0  si_shader_create (sscreen=sscreen@entry=0x55555561e5b0, compiler=0x555555589f40, shader=shader@entry=0x555555a961c0, debug=0x555555a961c8) at ../src/gallium/drivers/radeonsi/si_shader.c:8039
+#1  0x00007ffff5a9f38a in si_build_shader_variant (shader=0x555555a961c0, thread_index=<optimized out>, low_priority=<optimized out>) at ../src/gallium/drivers/radeonsi/si_state_shaders.c:1715
+#2  0x00007ffff5aa2d31 in si_shader_select_with_key (thread_index=-1, state=0x55555558a670, state=0x55555558a670, key=0x7fffffffd9e0, compiler_state=<optimized out>, sscreen=0x55555561e5b0)
+    at ../src/gallium/drivers/radeonsi/si_state_shaders.c:1977
+#3  si_shader_select (ctx=ctx@entry=0x555555589a50, state=state@entry=0x55555558a670, compiler_state=compiler_state@entry=0x7fffffffdad0) at ../src/gallium/drivers/radeonsi/si_state_shaders.c:1995
+#4  0x00007ffff5aa47f2 in si_update_shaders (sctx=sctx@entry=0x555555589a50) at ../src/gallium/drivers/radeonsi/si_state_shaders.c:3413
+#5  0x00007ffff5a9c019 in si_draw_vbo (ctx=ctx@entry=0x555555589a50, info=info@entry=0x7fffffffdbc0) at ../src/gallium/drivers/radeonsi/si_state_draw.c:1362
+#6  0x00007ffff5a9c95a in si_draw_rectangle (blitter=<optimized out>, vertex_elements_cso=<optimized out>, get_vs=<optimized out>, x1=<optimized out>, y1=<optimized out>, x2=<optimized out>, y2=500, 
+    depth=<optimized out>, num_instances=1, type=UTIL_BLITTER_ATTRIB_COLOR, attrib=0x7fffffffdc60) at ../src/gallium/drivers/radeonsi/si_state_draw.c:1576
+#7  0x00007ffff61292fc in util_blitter_clear_custom (blitter=0x5555555c9540, width=500, height=500, num_layers=1, clear_buffers=clear_buffers@entry=4, color=color@entry=0x555555a60b3c, 
+    depth=depth@entry=1, stencil=0, custom_dsa=0x0, custom_blend=0x0) at ../src/gallium/auxiliary/util/u_blitter.c:1438
+#8  0x00007ffff6129430 in util_blitter_clear (blitter=<optimized out>, width=<optimized out>, height=<optimized out>, num_layers=<optimized out>, clear_buffers=clear_buffers@entry=4, 
+    color=color@entry=0x555555a60b3c, depth=depth@entry=1, stencil=0) at ../src/gallium/auxiliary/util/u_blitter.c:1455
+#9  0x00007ffff5ac0edf in si_clear (ctx=0x555555589a50, buffers=4, color=<optimized out>, depth=<optimized out>, stencil=0) at ../src/gallium/drivers/radeonsi/si_clear.c:633
+#10 0x00007ffff5ed660f in st_Clear (ctx=0x555555a5ea60, mask=2) at ../src/mesa/state_tracker/st_cb_clear.c:452
+#11 0x00005555555567c9 in display() ()
+#12 0x00007ffff7d18844 in ?? () from /lib/x86_64-linux-gnu/libglut.so.3
+#13 0x00007ffff7d1c2e9 in fgEnumWindows () from /lib/x86_64-linux-gnu/libglut.so.3
+#14 0x00007ffff7d18e6d in glutMainLoopEvent () from /lib/x86_64-linux-gnu/libglut.so.3
+#15 0x00007ffff7d196a5 in glutMainLoop () from /lib/x86_64-linux-gnu/libglut.so.3
+#16 0x0000555555556851 in main ()
+
+
+
+
+
+(gdb) c
+Continuing.
+SHADER KEY
+  part.vs.prolog.instance_divisor_is_one = 0
+  part.vs.prolog.instance_divisor_is_fetched = 0
+  part.vs.prolog.ls_vgpr_fix = 0
+  mono.vs.fix_fetch = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+  as_es = 0
+  as_ls = 0
+  mono.u.vs_export_prim_id = 0
+  opt.kill_outputs = 0x0
+  opt.clip_disable = 0
+
+Vertex Shader as VS:
+Shader main disassembly:
+main:
+BB0_0:
+	v_mov_b32_e32 v1, s3                                                                ; 7E020203
+	v_mov_b32_e32 v2, s2                                                                ; 7E040202
+	v_cmp_gt_u32_e32 vcc, 2, v0                                                         ; 7D980082
+	v_cndmask_b32_e32 v3, v1, v2, vcc                                                   ; 00060501
+	v_cmp_eq_u32_e32 vcc, 1, v0                                                         ; 7D940081
+	v_cndmask_b32_e32 v0, v2, v1, vcc                                                   ; 00000302
+	v_cvt_f32_i32_sdwa v1, sext(v3) dst_sel:DWORD dst_unused:UNUSED_PAD src0_sel:WORD_0 ; 7E020AF9 000C0603
+	v_cvt_f32_i32_sdwa v0, sext(v0) dst_sel:DWORD dst_unused:UNUSED_PAD src0_sel:WORD_1 ; 7E000AF9 000D0600
+	v_mov_b32_e32 v2, 1.0                                                               ; 7E0402F2
+	v_mov_b32_e32 v3, s4                                                                ; 7E060204
+	exp pos0 v1, v0, v3, v2 done                                                        ; C40008CF 02030001
+	s_waitcnt expcnt(0)                                                                 ; BF8C0F0F
+	v_mov_b32_e32 v0, s5                                                                ; 7E000205
+	v_mov_b32_e32 v1, s6                                                                ; 7E020206
+	v_mov_b32_e32 v2, s7                                                                ; 7E040207
+	v_mov_b32_e32 v3, s8                                                                ; 7E060208
+	exp param0 v0, v1, v2, v3                                                           ; C400020F 03020100
+	s_endpgm                                                                            ; BF810000
+
+*** SHADER STATS ***
+SGPRS: 16
+VGPRS: 8
+Spilled SGPRs: 0
+Spilled VGPRs: 0
+Private memory VGPRs: 0
+Code Size: 108 bytes
+LDS: 0 blocks
+Scratch: 0 bytes per wave
+Max Waves: 8
+********************
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Thread 1 "a.out" hit Breakpoint 6, 0x00007ffff7fa5240 in glClear () from /home/shiji/mesa-18.3.6/build/install/lib/x86_64-linux-gnu/libGL.so.1
+(gdb) c
+Continuing.
+Mesa: shiji_glClear 0x4000
+
+Thread 1 "a.out" hit Breakpoint 5, si_shader_create (sscreen=sscreen@entry=0x55555561e580, compiler=0x555555589f40, shader=shader@entry=0x555555a96000, debug=0x555555a96008)
+    at ../src/gallium/drivers/radeonsi/si_shader.c:8039
+8039		struct si_shader_selector *sel = shader->selector;
+(gdb) bt5
+Undefined command: "bt5".  Try "help".
+(gdb) bt
+#0  si_shader_create (sscreen=sscreen@entry=0x55555561e580, compiler=0x555555589f40, shader=shader@entry=0x555555a96000, debug=0x555555a96008) at ../src/gallium/drivers/radeonsi/si_shader.c:8039
+#1  0x00007ffff5a9f38a in si_build_shader_variant (shader=0x555555a96000, thread_index=<optimized out>, low_priority=<optimized out>) at ../src/gallium/drivers/radeonsi/si_state_shaders.c:1715
+#2  0x00007ffff5aa2d31 in si_shader_select_with_key (thread_index=-1, state=0x55555558a670, state=0x55555558a670, key=0x7fffffffd9e0, compiler_state=<optimized out>, sscreen=0x55555561e580)
+    at ../src/gallium/drivers/radeonsi/si_state_shaders.c:1977
+#3  si_shader_select (ctx=ctx@entry=0x555555589a50, state=state@entry=0x55555558a670, compiler_state=compiler_state@entry=0x7fffffffdad0) at ../src/gallium/drivers/radeonsi/si_state_shaders.c:1995
+#4  0x00007ffff5aa47f2 in si_update_shaders (sctx=sctx@entry=0x555555589a50) at ../src/gallium/drivers/radeonsi/si_state_shaders.c:3413
+#5  0x00007ffff5a9c019 in si_draw_vbo (ctx=ctx@entry=0x555555589a50, info=info@entry=0x7fffffffdbc0) at ../src/gallium/drivers/radeonsi/si_state_draw.c:1362
+#6  0x00007ffff5a9c95a in si_draw_rectangle (blitter=<optimized out>, vertex_elements_cso=<optimized out>, get_vs=<optimized out>, x1=<optimized out>, y1=<optimized out>, x2=<optimized out>, y2=500, 
+    depth=<optimized out>, num_instances=1, type=UTIL_BLITTER_ATTRIB_COLOR, attrib=0x7fffffffdc60) at ../src/gallium/drivers/radeonsi/si_state_draw.c:1576
+#7  0x00007ffff61292fc in util_blitter_clear_custom (blitter=0x5555555c9540, width=500, height=500, num_layers=1, clear_buffers=clear_buffers@entry=4, color=color@entry=0x555555a607dc, 
+    depth=depth@entry=1, stencil=0, custom_dsa=0x0, custom_blend=0x0) at ../src/gallium/auxiliary/util/u_blitter.c:1438
+#8  0x00007ffff6129430 in util_blitter_clear (blitter=<optimized out>, width=<optimized out>, height=<optimized out>, num_layers=<optimized out>, clear_buffers=clear_buffers@entry=4, 
+    color=color@entry=0x555555a607dc, depth=depth@entry=1, stencil=0) at ../src/gallium/auxiliary/util/u_blitter.c:1455
+#9  0x00007ffff5ac0edf in si_clear (ctx=0x555555589a50, buffers=4, color=<optimized out>, depth=<optimized out>, stencil=0) at ../src/gallium/drivers/radeonsi/si_clear.c:633
+#10 0x00007ffff5ed660f in st_Clear (ctx=0x555555a5e700, mask=2) at ../src/mesa/state_tracker/st_cb_clear.c:452
+#11 0x00005555555567c9 in display() ()
+#12 0x00007ffff7d18844 in ?? () from /lib/x86_64-linux-gnu/libglut.so.3
+#13 0x00007ffff7d1c2e9 in fgEnumWindows () from /lib/x86_64-linux-gnu/libglut.so.3
+#14 0x00007ffff7d18e6d in glutMainLoopEvent () from /lib/x86_64-linux-gnu/libglut.so.3
+#15 0x00007ffff7d196a5 in glutMainLoop () from /lib/x86_64-linux-gnu/libglut.so.3
+#16 0x0000555555556851 in main ()
+(gdb) c
+Continuing.
+SHADER KEY
+  part.vs.prolog.instance_divisor_is_one = 0
+  part.vs.prolog.instance_divisor_is_fetched = 0
+  part.vs.prolog.ls_vgpr_fix = 0
+  mono.vs.fix_fetch = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+  as_es = 0
+  as_ls = 0
+  mono.u.vs_export_prim_id = 0
+  opt.kill_outputs = 0x0
+  opt.clip_disable = 0
+
+Vertex Shader as VS:
+Shader main disassembly:
+main:
+BB0_0:
+	v_mov_b32_e32 v1, s3                                                                ; 7E020203
+	v_mov_b32_e32 v2, s2                                                                ; 7E040202
+	v_cmp_gt_u32_e32 vcc, 2, v0                                                         ; 7D980082
+	v_cndmask_b32_e32 v3, v1, v2, vcc                                                   ; 00060501
+	v_cmp_eq_u32_e32 vcc, 1, v0                                                         ; 7D940081
+	v_cndmask_b32_e32 v0, v2, v1, vcc                                                   ; 00000302
+	v_cvt_f32_i32_sdwa v1, sext(v3) dst_sel:DWORD dst_unused:UNUSED_PAD src0_sel:WORD_0 ; 7E020AF9 000C0603
+	v_cvt_f32_i32_sdwa v0, sext(v0) dst_sel:DWORD dst_unused:UNUSED_PAD src0_sel:WORD_1 ; 7E000AF9 000D0600
+	v_mov_b32_e32 v2, 1.0                                                               ; 7E0402F2
+	v_mov_b32_e32 v3, s4                                                                ; 7E060204
+	exp pos0 v1, v0, v3, v2 done                                                        ; C40008CF 02030001
+	s_waitcnt expcnt(0)                                                                 ; BF8C0F0F
+	v_mov_b32_e32 v0, s5                                                                ; 7E000205
+	v_mov_b32_e32 v1, s6                                                                ; 7E020206
+	v_mov_b32_e32 v2, s7                                                                ; 7E040207
+	v_mov_b32_e32 v3, s8                                                                ; 7E060208
+	exp param0 v0, v1, v2, v3                                                           ; C400020F 03020100
+	s_endpgm                                                                            ; BF810000
+
+*** SHADER STATS ***
+SGPRS: 16
+VGPRS: 8
+Spilled SGPRs: 0
+Spilled VGPRs: 0
+Private memory VGPRs: 0
+Code Size: 108 bytes
+LDS: 0 blocks
+Scratch: 0 bytes per wave
+Max Waves: 8
+********************
+
+
+
+Thread 1 "a.out" hit Breakpoint 5, si_shader_create (sscreen=sscreen@entry=0x55555561e580, compiler=0x555555589f40, shader=shader@entry=0x555555a96830, debug=0x555555a96838)
+    at ../src/gallium/drivers/radeonsi/si_shader.c:8039
+8039		struct si_shader_selector *sel = shader->selector;
+(gdb) bt
+#0  si_shader_create (sscreen=sscreen@entry=0x55555561e580, compiler=0x555555589f40, shader=shader@entry=0x555555a96830, debug=0x555555a96838) at ../src/gallium/drivers/radeonsi/si_shader.c:8039
+#1  0x00007ffff5a9f38a in si_build_shader_variant (shader=0x555555a96830, thread_index=<optimized out>, low_priority=<optimized out>) at ../src/gallium/drivers/radeonsi/si_state_shaders.c:1715
+#2  0x00007ffff5aa2d31 in si_shader_select_with_key (thread_index=-1, state=0x55555558a650, state=0x55555558a650, key=0x7fffffffd9e0, compiler_state=<optimized out>, sscreen=0x55555561e580)
+    at ../src/gallium/drivers/radeonsi/si_state_shaders.c:1977
+#3  si_shader_select (ctx=ctx@entry=0x555555589a50, state=state@entry=0x55555558a650, compiler_state=compiler_state@entry=0x7fffffffdad0) at ../src/gallium/drivers/radeonsi/si_state_shaders.c:1995
+#4  0x00007ffff5aa3ba1 in si_update_shaders (sctx=sctx@entry=0x555555589a50) at ../src/gallium/drivers/radeonsi/si_state_shaders.c:3445
+#5  0x00007ffff5a9c019 in si_draw_vbo (ctx=ctx@entry=0x555555589a50, info=info@entry=0x7fffffffdbc0) at ../src/gallium/drivers/radeonsi/si_state_draw.c:1362
+#6  0x00007ffff5a9c95a in si_draw_rectangle (blitter=<optimized out>, vertex_elements_cso=<optimized out>, get_vs=<optimized out>, x1=<optimized out>, y1=<optimized out>, x2=<optimized out>, y2=500, 
+    depth=<optimized out>, num_instances=1, type=UTIL_BLITTER_ATTRIB_COLOR, attrib=0x7fffffffdc60) at ../src/gallium/drivers/radeonsi/si_state_draw.c:1576
+#7  0x00007ffff61292fc in util_blitter_clear_custom (blitter=0x5555555c9540, width=500, height=500, num_layers=1, clear_buffers=clear_buffers@entry=4, color=color@entry=0x555555a607dc, 
+    depth=depth@entry=1, stencil=0, custom_dsa=0x0, custom_blend=0x0) at ../src/gallium/auxiliary/util/u_blitter.c:1438
+#8  0x00007ffff6129430 in util_blitter_clear (blitter=<optimized out>, width=<optimized out>, height=<optimized out>, num_layers=<optimized out>, clear_buffers=clear_buffers@entry=4, 
+    color=color@entry=0x555555a607dc, depth=depth@entry=1, stencil=0) at ../src/gallium/auxiliary/util/u_blitter.c:1455
+#9  0x00007ffff5ac0edf in si_clear (ctx=0x555555589a50, buffers=4, color=<optimized out>, depth=<optimized out>, stencil=0) at ../src/gallium/drivers/radeonsi/si_clear.c:633
+#10 0x00007ffff5ed660f in st_Clear (ctx=0x555555a5e700, mask=2) at ../src/mesa/state_tracker/st_cb_clear.c:452
+#11 0x00005555555567c9 in display() ()
+#12 0x00007ffff7d18844 in ?? () from /lib/x86_64-linux-gnu/libglut.so.3
+#13 0x00007ffff7d1c2e9 in fgEnumWindows () from /lib/x86_64-linux-gnu/libglut.so.3
+#14 0x00007ffff7d18e6d in glutMainLoopEvent () from /lib/x86_64-linux-gnu/libglut.so.3
+#15 0x00007ffff7d196a5 in glutMainLoop () from /lib/x86_64-linux-gnu/libglut.so.3
+#16 0x0000555555556851 in main ()
+(gdb) c
+Continuing.
+radeonsi: Compiling shader 1
+Fragment Shader Epilog LLVM IR:
+
+; ModuleID = 'mesa-shader'
+source_filename = "mesa-shader"
+target datalayout = "e-p:64:64-p1:64:64-p2:32:32-p3:32:32-p4:64:64-p5:32:32-p6:32:32-i64:64-v16:16-v24:32-v32:32-v48:64-v96:128-v192:256-v256:256-v512:512-v1024:1024-v2048:2048-n32:64-S32-A5"
+target triple = "amdgcn--"
+
+define amdgpu_ps void @ps_epilog(i32 inreg, i32 inreg, i32 inreg, i32 inreg, float inreg, float, float, float, float, float, float, float, float, float, float, float, float, float, float, float) #0 {
+main_body:
+  %20 = call nsz <2 x half> @llvm.amdgcn.cvt.pkrtz(float %5, float %6) #3
+  %21 = call nsz <2 x half> @llvm.amdgcn.cvt.pkrtz(float %7, float %8) #3
+  %22 = bitcast <2 x half> %20 to <2 x i16>
+  %23 = bitcast <2 x half> %21 to <2 x i16>
+  call void @llvm.amdgcn.exp.compr.v2i16(i32 0, i32 15, <2 x i16> %22, <2 x i16> %23, i1 true, i1 true) #2
+  ret void
+}
+
+; Function Attrs: nounwind readnone speculatable
+declare <2 x half> @llvm.amdgcn.cvt.pkrtz(float, float) #1
+
+; Function Attrs: nounwind
+declare void @llvm.amdgcn.exp.compr.v2i16(i32, i32, <2 x i16>, <2 x i16>, i1, i1) #2
+
+attributes #0 = { "InitialPSInputAddr"="0xffffff" "no-signed-zeros-fp-math"="true" }
+attributes #1 = { nounwind readnone speculatable }
+attributes #2 = { nounwind }
+attributes #3 = { nounwind readnone }
+
+SHADER KEY
+  part.ps.prolog.color_two_side = 0
+  part.ps.prolog.flatshade_colors = 0
+  part.ps.prolog.poly_stipple = 0
+  part.ps.prolog.force_persp_sample_interp = 0
+  part.ps.prolog.force_linear_sample_interp = 0
+  part.ps.prolog.force_persp_center_interp = 0
+  part.ps.prolog.force_linear_center_interp = 0
+  part.ps.prolog.bc_optimize_for_persp = 0
+  part.ps.prolog.bc_optimize_for_linear = 0
+  part.ps.epilog.spi_shader_col_format = 0x4
+  part.ps.epilog.color_is_int8 = 0x0
+  part.ps.epilog.color_is_int10 = 0x0
+  part.ps.epilog.last_cbuf = 0
+  part.ps.epilog.alpha_func = 7
+  part.ps.epilog.alpha_to_one = 0
+  part.ps.epilog.poly_line_smoothing = 0
+  part.ps.epilog.clamp_color = 0
+
+Pixel Shader:
+Shader main disassembly:
+main:
+BB0_0:
+	s_mov_b32 m0, s5                     ; BEFC0005
+	v_interp_mov_f32_e32 v0, p0, attr0.x ; D4020002
+	v_interp_mov_f32_e32 v1, p0, attr0.y ; D4060102
+	v_interp_mov_f32_e32 v2, p0, attr0.z ; D40A0202
+	v_interp_mov_f32_e32 v3, p0, attr0.w ; D40E0302
+Shader epilog disassembly:
+ps_epilog:
+BB0_0:
+	v_cvt_pkrtz_f16_f32 v0, v0, v1        ; D2960000 00020300
+	v_cvt_pkrtz_f16_f32 v1, v2, v3        ; D2960001 00020702
+	exp mrt0 v0, v0, v1, v1 done compr vm ; C4001C0F 00000100
+	s_endpgm                              ; BF810000
+
+*** SHADER CONFIG ***
+SPI_PS_INPUT_ADDR = 0xf077
+SPI_PS_INPUT_ENA  = 0x0020
+*** SHADER STATS ***
+SGPRS: 8
+VGPRS: 24
+Spilled SGPRs: 0
+Spilled VGPRs: 0
+Private memory VGPRs: 0
+Code Size: 68 bytes
+LDS: 0 blocks
+Scratch: 0 bytes per wave
+Max Waves: 8
+********************
+
+
+
+Thread 1 "a.out" hit Breakpoint 7, 0x00007ffff7fa5fa0 in glDrawArraysEXT () from /home/shiji/mesa-18.3.6/build/install/lib/x86_64-linux-gnu/libGL.so.1
+(gdb) bt
+#0  0x00007ffff7fa5fa0 in glDrawArraysEXT () from /home/shiji/mesa-18.3.6/build/install/lib/x86_64-linux-gnu/libGL.so.1
+#1  0x00005555555567dd in display() ()
+#2  0x00007ffff7d18844 in ?? () from /lib/x86_64-linux-gnu/libglut.so.3
+#3  0x00007ffff7d1c2e9 in fgEnumWindows () from /lib/x86_64-linux-gnu/libglut.so.3
+#4  0x00007ffff7d18e6d in glutMainLoopEvent () from /lib/x86_64-linux-gnu/libglut.so.3
+#5  0x00007ffff7d196a5 in glutMainLoop () from /lib/x86_64-linux-gnu/libglut.so.3
+#6  0x0000555555556851 in main ()
+(gdb) c
+Continuing.
+
+Thread 1 "a.out" hit Breakpoint 5, si_shader_create (sscreen=sscreen@entry=0x55555561e580, compiler=0x555555589f40, shader=shader@entry=0x555555ae0ce0, debug=0x555555ae0ce8)
+    at ../src/gallium/drivers/radeonsi/si_shader.c:8039
+8039		struct si_shader_selector *sel = shader->selector;
+(gdb) bt
+#0  si_shader_create (sscreen=sscreen@entry=0x55555561e580, compiler=0x555555589f40, shader=shader@entry=0x555555ae0ce0, debug=0x555555ae0ce8) at ../src/gallium/drivers/radeonsi/si_shader.c:8039
+#1  0x00007ffff5a9f38a in si_build_shader_variant (shader=0x555555ae0ce0, thread_index=<optimized out>, low_priority=<optimized out>) at ../src/gallium/drivers/radeonsi/si_state_shaders.c:1715
+#2  0x00007ffff5aa2d31 in si_shader_select_with_key (thread_index=-1, state=0x55555558a670, state=0x55555558a670, key=0x7fffffffd940, compiler_state=<optimized out>, sscreen=0x55555561e580)
+    at ../src/gallium/drivers/radeonsi/si_state_shaders.c:1977
+#3  si_shader_select (ctx=ctx@entry=0x555555589a50, state=state@entry=0x55555558a670, compiler_state=compiler_state@entry=0x7fffffffda30) at ../src/gallium/drivers/radeonsi/si_state_shaders.c:1995
+#4  0x00007ffff5aa47f2 in si_update_shaders (sctx=sctx@entry=0x555555589a50) at ../src/gallium/drivers/radeonsi/si_state_shaders.c:3413
+#5  0x00007ffff5a9c019 in si_draw_vbo (ctx=0x555555589a50, info=0x7fffffffdd10) at ../src/gallium/drivers/radeonsi/si_state_draw.c:1362
+#6  0x00007ffff593d809 in u_vbuf_draw_vbo (mgr=0x555555a9f830, info=0x7fffffffdd10) at ../src/gallium/auxiliary/util/u_vbuf.c:1182
+#7  0x00007ffff5e6c1e7 in st_draw_vbo (ctx=<optimized out>, prims=<optimized out>, nr_prims=<optimized out>, ib=0x0, index_bounds_valid=<optimized out>, min_index=<optimized out>, 
+    max_index=<optimized out>, tfb_vertcount=0x0, stream=0, indirect=0x0) at ../src/mesa/state_tracker/st_draw.c:236
+#8  0x00007ffff5de6a62 in _mesa_draw_arrays (drawID=0, baseInstance=0, numInstances=1, count=3, start=0, mode=4, ctx=0x555555a5e700) at ../src/mesa/main/draw.c:408
+#9  _mesa_draw_arrays (ctx=0x555555a5e700, mode=4, start=0, count=3, numInstances=1, baseInstance=0, drawID=0) at ../src/mesa/main/draw.c:385
+#10 0x00007ffff5de7775 in _mesa_exec_DrawArrays (mode=4, start=0, count=3) at ../src/mesa/main/draw.c:565
+#11 0x00005555555567dd in display() ()
+#12 0x00007ffff7d18844 in ?? () from /lib/x86_64-linux-gnu/libglut.so.3
+#13 0x00007ffff7d1c2e9 in fgEnumWindows () from /lib/x86_64-linux-gnu/libglut.so.3
+#14 0x00007ffff7d18e6d in glutMainLoopEvent () from /lib/x86_64-linux-gnu/libglut.so.3
+#15 0x00007ffff7d196a5 in glutMainLoop () from /lib/x86_64-linux-gnu/libglut.so.3
+#16 0x0000555555556851 in main ()
+(gdb) c
+Continuing.
+radeonsi: Compiling shader 2
+Vertex Shader Prolog LLVM IR:
+
+; ModuleID = 'mesa-shader'
+source_filename = "mesa-shader"
+target datalayout = "e-p:64:64-p1:64:64-p2:32:32-p3:32:32-p4:64:64-p5:32:32-p6:32:32-i64:64-v16:16-v24:32-v32:32-v48:64-v96:128-v192:256-v256:256-v512:512-v1024:1024-v2048:2048-n32:64-S32-A5"
+target triple = "amdgcn--"
+
+define amdgpu_vs <{ i32, i32, i32, i32, i32, i32, i32, i32, i32, float, float, float, float, float }> @vs_prolog(i32 inreg, i32 inreg, i32 inreg, i32 inreg, i32 inreg, i32 inreg, i32 inreg, i32 inreg, i32 inreg, i32, i32, i32, i32) #0 {
+main_body:
+  %13 = insertvalue <{ i32, i32, i32, i32, i32, i32, i32, i32, i32, float, float, float, float, float }> undef, i32 %0, 0
+  %14 = insertvalue <{ i32, i32, i32, i32, i32, i32, i32, i32, i32, float, float, float, float, float }> %13, i32 %1, 1
+  %15 = insertvalue <{ i32, i32, i32, i32, i32, i32, i32, i32, i32, float, float, float, float, float }> %14, i32 %2, 2
+  %16 = insertvalue <{ i32, i32, i32, i32, i32, i32, i32, i32, i32, float, float, float, float, float }> %15, i32 %3, 3
+  %17 = insertvalue <{ i32, i32, i32, i32, i32, i32, i32, i32, i32, float, float, float, float, float }> %16, i32 %4, 4
+  %18 = insertvalue <{ i32, i32, i32, i32, i32, i32, i32, i32, i32, float, float, float, float, float }> %17, i32 %5, 5
+  %19 = insertvalue <{ i32, i32, i32, i32, i32, i32, i32, i32, i32, float, float, float, float, float }> %18, i32 %6, 6
+  %20 = insertvalue <{ i32, i32, i32, i32, i32, i32, i32, i32, i32, float, float, float, float, float }> %19, i32 %7, 7
+  %21 = insertvalue <{ i32, i32, i32, i32, i32, i32, i32, i32, i32, float, float, float, float, float }> %20, i32 %8, 8
+  %22 = bitcast i32 %9 to float
+  %23 = insertvalue <{ i32, i32, i32, i32, i32, i32, i32, i32, i32, float, float, float, float, float }> %21, float %22, 9
+  %24 = bitcast i32 %10 to float
+  %25 = insertvalue <{ i32, i32, i32, i32, i32, i32, i32, i32, i32, float, float, float, float, float }> %23, float %24, 10
+  %26 = bitcast i32 %11 to float
+  %27 = insertvalue <{ i32, i32, i32, i32, i32, i32, i32, i32, i32, float, float, float, float, float }> %25, float %26, 11
+  %28 = bitcast i32 %12 to float
+  %29 = insertvalue <{ i32, i32, i32, i32, i32, i32, i32, i32, i32, float, float, float, float, float }> %27, float %28, 12
+  %30 = add i32 %9, %5
+  %31 = bitcast i32 %30 to float
+  %32 = insertvalue <{ i32, i32, i32, i32, i32, i32, i32, i32, i32, float, float, float, float, float }> %29, float %31, 13
+  ret <{ i32, i32, i32, i32, i32, i32, i32, i32, i32, float, float, float, float, float }> %32
+}
+
+attributes #0 = { "no-signed-zeros-fp-math"="true" }
+
+SHADER KEY
+  part.vs.prolog.instance_divisor_is_one = 0
+  part.vs.prolog.instance_divisor_is_fetched = 0
+  part.vs.prolog.ls_vgpr_fix = 0
+  mono.vs.fix_fetch = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+  as_es = 0
+  as_ls = 0
+  mono.u.vs_export_prim_id = 0
+  opt.kill_outputs = 0x0
+  opt.clip_disable = 0
+
+Vertex Shader as VS:
+Shader prolog disassembly:
+vs_prolog:
+BB1_0:
+	v_add_u32_e32 v4, vcc, s5, v0 ; 32080005
+Shader main disassembly:
+main:
+BB0_0:
+	s_mov_b32 s9, 0                                     ; BE890080
+	s_load_dwordx4 s[0:3], s[8:9], 0x0                  ; C00A0004 00000000
+	s_waitcnt lgkmcnt(0)                                ; BF8C007F
+	buffer_load_format_xyzw v[0:3], v4, s[0:3], 0 idxen ; E00C2000 80000004
+	s_waitcnt vmcnt(0)                                  ; BF8C0F70
+	v_mov_b32_e32 v3, 1.0                               ; 7E0602F2
+	exp pos0 v0, v1, v2, v3 done                        ; C40008CF 03020100
+	s_endpgm                                            ; BF810000
+
+*** SHADER STATS ***
+SGPRS: 16
+VGPRS: 8
+Spilled SGPRs: 0
+Spilled VGPRs: 0
+Private memory VGPRs: 0
+Code Size: 68 bytes
+LDS: 0 blocks
+Scratch: 0 bytes per wave
+Max Waves: 8
+********************
+
+
+
+Thread 1 "a.out" hit Breakpoint 5, si_shader_create (sscreen=sscreen@entry=0x55555561e580, compiler=0x555555589f40, shader=shader@entry=0x555555af72f0, debug=0x555555af72f8)
+    at ../src/gallium/drivers/radeonsi/si_shader.c:8039
+8039		struct si_shader_selector *sel = shader->selector;
+(gdb) bt
+#0  si_shader_create (sscreen=sscreen@entry=0x55555561e580, compiler=0x555555589f40, shader=shader@entry=0x555555af72f0, debug=0x555555af72f8) at ../src/gallium/drivers/radeonsi/si_shader.c:8039
+#1  0x00007ffff5a9f38a in si_build_shader_variant (shader=0x555555af72f0, thread_index=<optimized out>, low_priority=<optimized out>) at ../src/gallium/drivers/radeonsi/si_state_shaders.c:1715
+#2  0x00007ffff5aa2d31 in si_shader_select_with_key (thread_index=-1, state=0x55555558a650, state=0x55555558a650, key=0x7fffffffd940, compiler_state=<optimized out>, sscreen=0x55555561e580)
+    at ../src/gallium/drivers/radeonsi/si_state_shaders.c:1977
+#3  si_shader_select (ctx=ctx@entry=0x555555589a50, state=state@entry=0x55555558a650, compiler_state=compiler_state@entry=0x7fffffffda30) at ../src/gallium/drivers/radeonsi/si_state_shaders.c:1995
+#4  0x00007ffff5aa3ba1 in si_update_shaders (sctx=sctx@entry=0x555555589a50) at ../src/gallium/drivers/radeonsi/si_state_shaders.c:3445
+#5  0x00007ffff5a9c019 in si_draw_vbo (ctx=0x555555589a50, info=0x7fffffffdd10) at ../src/gallium/drivers/radeonsi/si_state_draw.c:1362
+#6  0x00007ffff593d809 in u_vbuf_draw_vbo (mgr=0x555555a9f830, info=0x7fffffffdd10) at ../src/gallium/auxiliary/util/u_vbuf.c:1182
+#7  0x00007ffff5e6c1e7 in st_draw_vbo (ctx=<optimized out>, prims=<optimized out>, nr_prims=<optimized out>, ib=0x0, index_bounds_valid=<optimized out>, min_index=<optimized out>, 
+    max_index=<optimized out>, tfb_vertcount=0x0, stream=0, indirect=0x0) at ../src/mesa/state_tracker/st_draw.c:236
+#8  0x00007ffff5de6a62 in _mesa_draw_arrays (drawID=0, baseInstance=0, numInstances=1, count=3, start=0, mode=4, ctx=0x555555a5e700) at ../src/mesa/main/draw.c:408
+#9  _mesa_draw_arrays (ctx=0x555555a5e700, mode=4, start=0, count=3, numInstances=1, baseInstance=0, drawID=0) at ../src/mesa/main/draw.c:385
+#10 0x00007ffff5de7775 in _mesa_exec_DrawArrays (mode=4, start=0, count=3) at ../src/mesa/main/draw.c:565
+#11 0x00005555555567dd in display() ()
+#12 0x00007ffff7d18844 in ?? () from /lib/x86_64-linux-gnu/libglut.so.3
+#13 0x00007ffff7d1c2e9 in fgEnumWindows () from /lib/x86_64-linux-gnu/libglut.so.3
+#14 0x00007ffff7d18e6d in glutMainLoopEvent () from /lib/x86_64-linux-gnu/libglut.so.3
+#15 0x00007ffff7d196a5 in glutMainLoop () from /lib/x86_64-linux-gnu/libglut.so.3
+#16 0x0000555555556851 in main ()
+(gdb) c
+Continuing.
+SHADER KEY
+  part.ps.prolog.color_two_side = 0
+  part.ps.prolog.flatshade_colors = 0
+  part.ps.prolog.poly_stipple = 0
+  part.ps.prolog.force_persp_sample_interp = 0
+  part.ps.prolog.force_linear_sample_interp = 0
+  part.ps.prolog.force_persp_center_interp = 0
+  part.ps.prolog.force_linear_center_interp = 0
+  part.ps.prolog.bc_optimize_for_persp = 0
+  part.ps.prolog.bc_optimize_for_linear = 0
+  part.ps.epilog.spi_shader_col_format = 0x4
+  part.ps.epilog.color_is_int8 = 0x0
+  part.ps.epilog.color_is_int10 = 0x0
+  part.ps.epilog.last_cbuf = 0
+  part.ps.epilog.alpha_func = 7
+  part.ps.epilog.alpha_to_one = 0
+  part.ps.epilog.poly_line_smoothing = 0
+  part.ps.epilog.clamp_color = 0
+
+Pixel Shader:
+Shader main disassembly:
+main:
+BB0_0:
+	v_mov_b32_e32 v0, 1.0 ; 7E0002F2
+	v_mov_b32_e32 v1, 0   ; 7E020280
+	v_mov_b32_e32 v2, 0   ; 7E040280
+	v_mov_b32_e32 v3, 1.0 ; 7E0602F2
+Shader epilog disassembly:
+ps_epilog:
+BB0_0:
+	v_cvt_pkrtz_f16_f32 v0, v0, v1        ; D2960000 00020300
+	v_cvt_pkrtz_f16_f32 v1, v2, v3        ; D2960001 00020702
+	exp mrt0 v0, v0, v1, v1 done compr vm ; C4001C0F 00000100
+	s_endpgm                              ; BF810000
+
+*** SHADER CONFIG ***
+SPI_PS_INPUT_ADDR = 0xf077
+SPI_PS_INPUT_ENA  = 0x0020
+*** SHADER STATS ***
+SGPRS: 8
+VGPRS: 24
+Spilled SGPRs: 0
+Spilled VGPRs: 0
+Private memory VGPRs: 0
+Code Size: 64 bytes
+LDS: 0 blocks
+Scratch: 0 bytes per wave
+Max Waves: 8
+********************
+
+
+
+Thread 1 "a.out" hit Breakpoint 1, 0x00007ffff7fa5400 in glFlush () from /home/shiji/mesa-18.3.6/build/install/lib/x86_64-linux-gnu/libGL.so.1
+(gdb) bt
+#0  0x00007ffff7fa5400 in glFlush () from /home/shiji/mesa-18.3.6/build/install/lib/x86_64-linux-gnu/libGL.so.1
+#1  0x00007ffff7d0f1be in glutSwapBuffers () from /lib/x86_64-linux-gnu/libglut.so.3
+#2  0x00005555555567e2 in display() ()
+#3  0x00007ffff7d18844 in ?? () from /lib/x86_64-linux-gnu/libglut.so.3
+#4  0x00007ffff7d1c2e9 in fgEnumWindows () from /lib/x86_64-linux-gnu/libglut.so.3
+#5  0x00007ffff7d18e6d in glutMainLoopEvent () from /lib/x86_64-linux-gnu/libglut.so.3
+#6  0x00007ffff7d196a5 in glutMainLoop () from /lib/x86_64-linux-gnu/libglut.so.3
+#7  0x0000555555556851 in main ()
+(gdb) c
+Continuing.
+
+
+
+
+void si_init_shader_functions(struct si_context *sctx)
+{
+	sctx->atoms.s.spi_map.emit = si_emit_spi_map;
+	sctx->atoms.s.scratch_state.emit = si_emit_scratch_state;
+
+	sctx->b.create_vs_state = si_create_shader_selector;
+	sctx->b.create_tcs_state = si_create_shader_selector;
+	sctx->b.create_tes_state = si_create_shader_selector;
+	sctx->b.create_gs_state = si_create_shader_selector;
+	sctx->b.create_fs_state = si_create_shader_selector;
+
+	sctx->b.bind_vs_state = si_bind_vs_shader;
+	sctx->b.bind_tcs_state = si_bind_tcs_shader;
+	sctx->b.bind_tes_state = si_bind_tes_shader;
+	sctx->b.bind_gs_state = si_bind_gs_shader;
+	sctx->b.bind_fs_state = si_bind_ps_shader;
+
+	sctx->b.delete_vs_state = si_delete_shader_selector;
+	sctx->b.delete_tcs_state = si_delete_shader_selector;
+	sctx->b.delete_tes_state = si_delete_shader_selector;
+	sctx->b.delete_gs_state = si_delete_shader_selector;
+	sctx->b.delete_fs_state = si_delete_shader_selector;
+}
+
+(gdb) p *sel 
+$3 = {
+  reference = {
+    count = 1
+  }, 
+  screen = 0x55555561e5b0, 
+  ready = {
+    val = 0
+  }, 
+  compiler_ctx_state = {
+    compiler = 0x0, 
+    debug = {
+      async = true, 
+      debug_message = 0x7ffff6125930 <u_async_debug_message>, 
+      data = 0x7fffffffd960
+    }, 
+    is_debug_context = false
+  }, 
+  mutex = {
+    __data = {
+      __lock = 0, 
+      __count = 0, 
+      __owner = 0, 
+      __nusers = 0, 
+      __kind = 0, 
+      __spins = 0, 
+      __elision = 0, 
+      __list = {
+        __prev = 0x0, 
+        __next = 0x0
+      }
+    }, 
+    __size = '\000' <repeats 39 times>, 
+    __align = 0
+  }, 
+  first_variant = 0x0, 
+  last_variant = 0x0, 
+  main_shader_part = 0x7fffd0000b20, 
+  main_shader_part_ls = 0x0, 
+  main_shader_part_es = 0x0, 
+  gs_copy_shader = 0x0, 
+  tokens = 0x555555a96310, 
+  nir = 0x0, 
+  so = {
+    num_outputs = 0, 
+    stride = {0, 0, 0, 0}, 
+    output = {{
+        register_index = 0, 
+        start_component = 0, 
+        num_components = 0, 
+        output_buffer = 0, 
+        dst_offset = 0, 
+        stream = 0
+--Type <RET> for more, q to quit, c to continue without paging--
+      } <repeats 64 times>}
+  }, 
+  info = {
+    num_tokens = 25, 
+    num_inputs = 2 '\002', 
+    num_outputs = 2 '\002', 
+    input_semantic_name = '\000' <repeats 79 times>, 
+    input_semantic_index = '\000' <repeats 79 times>, 
+    input_interpolate = '\000' <repeats 79 times>, 
+    input_interpolate_loc = '\000' <repeats 79 times>, 
+    input_usage_mask = "\017\017", '\000' <repeats 77 times>, 
+    input_cylindrical_wrap = '\000' <repeats 79 times>, 
+    output_semantic_name = "\000\005", '\000' <repeats 77 times>, 
+    output_semantic_index = '\000' <repeats 79 times>, 
+    output_usagemask = "\017\017", '\000' <repeats 77 times>, 
+    output_streams = '\000' <repeats 79 times>, 
+    num_system_values = 0 '\000', 
+    system_value_semantic_name = '\000' <repeats 79 times>, 
+    processor = 0 '\000', 
+    file_mask = {0, 0, 3, 3, 0 <repeats 11 times>}, 
+    file_count = {0, 0, 2, 2, 0 <repeats 11 times>}, 
+    file_max = {-1, -1, 1, 1, -1 <repeats 11 times>}, 
+    const_file_max = {-1 <repeats 32 times>}, 
+    const_buffers_declared = 0, 
+    samplers_declared = 0, 
+    sampler_targets = '\022' <repeats 128 times>, 
+    sampler_type = '\000' <repeats 127 times>, 
+    num_stream_output_components = "\b\000\000", 
+    input_array_first = '\000' <repeats 79 times>, 
+    input_array_last = '\000' <repeats 79 times>, 
+    output_array_first = '\000' <repeats 79 times>, 
+    output_array_last = '\000' <repeats 79 times>, 
+    array_max = {0 <repeats 15 times>}, 
+    immediate_count = 0, 
+    num_instructions = 3, 
+    num_memory_instructions = 0, 
+    opcode_count = {0, 2, 0 <repeats 115 times>, 1, 0 <repeats 132 times>}, 
+    reads_pervertex_outputs = 0 '\000', 
+    reads_perpatch_outputs = 0 '\000', 
+    reads_tessfactor_outputs = 0 '\000', 
+    colors_read = 0 '\000', 
+    colors_written = 0 '\000', 
+    reads_position = 1 '\001', 
+    reads_z = 0 '\000', 
+    reads_samplemask = 0 '\000', 
+    reads_tess_factors = 0 '\000', 
+    writes_z = 0 '\000', 
+    writes_stencil = 0 '\000', 
+    writes_samplemask = 0 '\000', 
+    writes_edgeflag = 0 '\000', 
+    uses_kill = 0 '\000', 
+    uses_persp_center = 0 '\000', 
+--Type <RET> for more, q to quit, c to continue without paging--
+    uses_persp_centroid = 0 '\000', 
+    uses_persp_sample = 0 '\000', 
+    uses_linear_center = 0 '\000', 
+    uses_linear_centroid = 0 '\000', 
+    uses_linear_sample = 0 '\000', 
+    uses_persp_opcode_interp_centroid = 0 '\000', 
+    uses_persp_opcode_interp_offset = 0 '\000', 
+    uses_persp_opcode_interp_sample = 0 '\000', 
+    uses_linear_opcode_interp_centroid = 0 '\000', 
+    uses_linear_opcode_interp_offset = 0 '\000', 
+    uses_linear_opcode_interp_sample = 0 '\000', 
+    uses_instanceid = 0 '\000', 
+    uses_vertexid = 0 '\000', 
+    uses_vertexid_nobase = 0 '\000', 
+    uses_basevertex = 0 '\000', 
+    uses_primid = 0 '\000', 
+    uses_frontface = 0 '\000', 
+    uses_invocationid = 0 '\000', 
+    uses_thread_id = "\000\000", 
+    uses_block_id = "\000\000", 
+    uses_block_size = 0 '\000', 
+    uses_grid_size = 0 '\000', 
+    writes_position = 1 '\001', 
+    writes_psize = 0 '\000', 
+    writes_clipvertex = 0 '\000', 
+    writes_primid = 0 '\000', 
+    writes_viewport_index = 0 '\000', 
+    writes_layer = 0 '\000', 
+    writes_memory = 0 '\000', 
+    uses_doubles = 0 '\000', 
+    uses_derivatives = 0 '\000', 
+    uses_bindless_samplers = 0 '\000', 
+    uses_bindless_images = 0 '\000', 
+    clipdist_writemask = 0, 
+    culldist_writemask = 0, 
+    num_written_culldistance = 0, 
+    num_written_clipdistance = 0, 
+    images_declared = 0, 
+    images_buffers = 0, 
+    images_load = 0, 
+    images_store = 0, 
+    images_atomic = 0, 
+    shader_buffers_declared = 0, 
+    shader_buffers_load = 0, 
+    shader_buffers_store = 0, shader_buffers_atomic = 0, 
+    indirect_files = 0, 
+    indirect_files_read = 0, 
+    indirect_files_written = 0, 
+    dim_indirect_files = 0, 
+    const_buffers_indirect = 0, 
+    properties = {0, 0, 0, 7, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0}, 
+--Type <RET> for more, q to quit, c to continue without paging--
+    max_depth = 0
+  }, 
+  tcs_info = {
+    tessfactors_are_def_in_all_invocs = false
+  }, 
+  type = 0, 
+  vs_needs_prolog = false, 
+  force_correct_derivs_after_kill = false, 
+  pa_cl_vs_out_cntl = 0, 
+  clipdist_mask = 0 '\000', 
+  culldist_mask = 0 '\000', 
+  esgs_itemsize = 32, 
+  lshs_vertex_stride = 36, 
+  gs_input_verts_per_prim = 0, 
+  gs_output_prim = 0, 
+  gs_max_out_vertices = 0, 
+  gs_num_invocations = 0, 
+  max_gs_stream = 0, 
+  gsvs_vertex_size = 0, 
+  max_gsvs_emit_size = 0, 
+  enabled_streamout_buffer_mask = 0, 
+  color_attr_index = {0, 0}, 
+  db_shader_control = 16, 
+  colors_written_4bit = 0, 
+  outputs_written_before_ps = 3, 
+  outputs_written = 3, 
+  patch_outputs_written = 0, 
+  inputs_read = 0, 
+  active_const_and_shader_buffers = 0, 
+  active_samplers_and_images = 0
+}
+
+
+
+
+(gdb) p *sel->main_shader_part
+$4 = {
+  compiler_ctx_state = {
+    compiler = 0x0, 
+    debug = {
+      async = false, 
+      debug_message = 0x0, 
+      data = 0x0
+    }, 
+    is_debug_context = false
+  }, 
+  selector = 0x555555a954d0, 
+  previous_stage_sel = 0x0, 
+  next_variant = 0x0, 
+  prolog = 0x0, 
+  previous_stage = 0x0, 
+  prolog2 = 0x0, 
+  epilog = 0x0, 
+  pm4 = 0x0, 
+  bo = 0x0, 
+  scratch_bo = 0x0, 
+  key = {
+    part = {
+      vs = {
+        prolog = {
+          instance_divisor_is_one = 0, 
+          instance_divisor_is_fetched = 0, 
+          ls_vgpr_fix = 0
+        }
+      }, 
+      tcs = {
+        ls_prolog = {
+          instance_divisor_is_one = 0, 
+          instance_divisor_is_fetched = 0, 
+          ls_vgpr_fix = 0
+        }, 
+        ls = 0x0, 
+        epilog = {
+          prim_mode = 0, 
+          invoc0_tess_factors_are_def = 0, 
+          tes_reads_tess_factors = 0
+        }
+      }, 
+      gs = {
+        vs_prolog = {
+          instance_divisor_is_one = 0, 
+          instance_divisor_is_fetched = 0, 
+          ls_vgpr_fix = 0
+        }, 
+        es = 0x0, 
+        prolog = {
+          tri_strip_adj_fix = 0, 
+          gfx9_prev_is_vs = 0
+--Type <RET> for more, q to quit, c to continue without paging--
+        }
+      }, 
+      ps = {
+        prolog = {
+          color_two_side = 0, 
+          flatshade_colors = 0, 
+          poly_stipple = 0, 
+          force_persp_sample_interp = 0, 
+          force_linear_sample_interp = 0, 
+          force_persp_center_interp = 0, 
+          force_linear_center_interp = 0, 
+          bc_optimize_for_persp = 0, 
+          bc_optimize_for_linear = 0, 
+          samplemask_log_ps_iter = 0
+        }, 
+        epilog = {
+          spi_shader_col_format = 0, 
+          color_is_int8 = 0, 
+          color_is_int10 = 0, 
+          last_cbuf = 0, 
+          alpha_func = 0, 
+          alpha_to_one = 0, 
+          poly_line_smoothing = 0, 
+          clamp_color = 0
+        }
+      }
+    }, 
+    as_es = 0, 
+    as_ls = 0, 
+    mono = {
+      vs_fix_fetch = '\000' <repeats 15 times>, 
+      u = {
+        ff_tcs_inputs_to_copy = 0, 
+        vs_export_prim_id = 0, 
+        ps = {
+          interpolate_at_sample_force_center = 0, 
+          fbfetch_msaa = 0, 
+          fbfetch_is_1D = 0, 
+          fbfetch_layered = 0
+        }
+      }
+    }, 
+    opt = {
+      kill_outputs = 0, 
+      clip_disable = 0, 
+      prefer_mono = 0
+    }
+  }, 
+  ready = {
+    val = 0
+  }, 
+  compilation_failed = false, 
+--Type <RET> for more, q to quit, c to continue without paging--
+  is_monolithic = false, 
+  is_optimized = false, 
+  is_binary_shared = false, 
+  is_gs_copy_shader = false, 
+  binary = {
+    code_size = 88, 
+    config_size = 0, 
+    config_size_per_symbol = 0, 
+    rodata_size = 0, 
+    global_symbol_count = 0, 
+    reloc_count = 0, 
+    code = 0x7fffd0001980 "\003\002\002~\002\002\004~\202", 
+    config = 0x0, 
+    rodata = 0x0, 
+    global_symbol_offsets = 0x0, 
+    relocs = 0x0, 
+    disasm_string = 0x7fffd00019e0 "main:\nBB0_0:\n\tv_mov_b32_e32 v1, s3", ' ' <repeats 64 times>, "; 7E020203\n\tv_mov_b32_e32 v2, s2", ' ' <repeats 64 times>, "; 7E04"..., 
+    llvm_ir_string = 0x0
+  }, 
+  config = {
+    num_sgprs = 16, 
+    num_vgprs = 8, 
+    spilled_sgprs = 0, 
+    spilled_vgprs = 0, 
+    private_mem_vgprs = 0, 
+    lds_size = 0, 
+    max_simd_waves = 8, 
+    spi_ps_input_ena = 0, 
+    spi_ps_input_addr = 0, 
+    float_mode = 192, 
+    scratch_bytes_per_wave = 0, 
+    rsrc1 = 65, 
+    rsrc2 = 0
+  }, 
+  info = {
+    vs_output_param_offset = "\377\000", '\377' <repeats 38 times>, 
+    num_input_sgprs = 9 '\t', 
+    num_input_vgprs = 4 '\004', 
+    face_vgpr_index = 0 '\000', 
+    ancillary_vgpr_index = 0 '\000', 
+    uses_instanceid = false, 
+    nr_pos_exports = 1 '\001', 
+    nr_param_exports = 1 '\001'
+  }, 
+  shader_log = 0x0, 
+  shader_log_size = 0, 
+  ctx_reg = {
+    gs = {
+      vgt_gsvs_ring_offset_1 = 0, 
+      vgt_gsvs_ring_offset_2 = 0, 
+      vgt_gsvs_ring_offset_3 = 0, 
+      vgt_gs_out_prim_type = 0, 
+--Type <RET> for more, q to quit, c to continue without paging--
+      vgt_gsvs_ring_itemsize = 0, 
+      vgt_gs_max_vert_out = 0, 
+      vgt_gs_vert_itemsize = 0, 
+      vgt_gs_vert_itemsize_1 = 0, 
+      vgt_gs_vert_itemsize_2 = 0, 
+      vgt_gs_vert_itemsize_3 = 0, 
+      vgt_gs_instance_cnt = 0, 
+      vgt_gs_onchip_cntl = 0, 
+      vgt_gs_max_prims_per_subgroup = 0, 
+      vgt_esgs_ring_itemsize = 0
+    }, 
+    vs = {
+      vgt_gs_mode = 0, 
+      vgt_primitiveid_en = 0, 
+      vgt_reuse_off = 0, 
+      spi_vs_out_config = 0, 
+      spi_shader_pos_format = 0, 
+      pa_cl_vte_cntl = 0
+    }, 
+    ps = {
+      spi_ps_input_ena = 0, 
+      spi_ps_input_addr = 0, 
+      spi_baryc_cntl = 0, 
+      spi_ps_in_control = 0, 
+      spi_shader_z_format = 0, 
+      spi_shader_col_format = 0, 
+      cb_shader_mask = 0
+    }
+  }, 
+  vgt_tf_param = 0, 
+  vgt_vertex_reuse_block_cntl = 0
+}
+
+o
+p sel->main_shader_part->binary->code
+
+
+
+util_blitter_restore_vertex_states
+o
+
+
+0  si_get_shader_name (shader=0x7fffe4000b20, processor=0) at ../src/gallium/drivers/radeonsi/si_shader.c:5500
+#1  0x00007ffff5ae5700 in si_compile_tgsi_shader (sscreen=sscreen@entry=0x55555561e5b0, compiler=compiler@entry=0x55555561ecc8, shader=shader@entry=0x7fffe4000b20, debug=debug@entry=0x555555a8e4f0)
+    at ../src/gallium/drivers/radeonsi/si_shader.c:6742
+#
