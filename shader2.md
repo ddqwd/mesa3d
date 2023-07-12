@@ -200,7 +200,7 @@ int main(int argc, char** argv)
 
 ```bash
 
-g++ ./a.cpp -lGL -lglut
+g++ ./a.cpp -lGL -lglut -g
 
 ```
 
