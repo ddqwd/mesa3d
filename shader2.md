@@ -752,7 +752,8 @@ static bool si_get_vs_prolog(struct si_screen *sscreen,
 *- 输入变量v2
 *- 输入变量v3
 *- （VertexID + BaseVertex）
-*- （InstanceID + StartInstance） *- （InstanceID / 2 + StartInstance） */ static void si_build_vs_prolog_function(struct si_shader_context *ctx,
+*- （InstanceID + StartInstance） *- （InstanceID / 2 + StartInstance） */
+ static void si_build_vs_prolog_function(struct si_shader_context *ctx,
 					union si_shader_part_key *key)
 {
     //初始化一个si_function_info结构体，这个结构体主要包含了函数参数的类型和数量等信息。
