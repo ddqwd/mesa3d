@@ -26,6 +26,8 @@ OpenGL的渲染管线是处理和呈现3D对象的一系列步骤，每个步骤
 
 ##  OpenGL Shader的使用步骤
 
+![shader_layer](https://github.com/ddqwd/mesa3d/blob/main/opengl_no.jpg)
+
 在OpenGL中使用shader（着色器）主要涉及以下步骤：
 
 1. **创建着色器对象：** 使用 `glCreateShader` 函数来创建一个新的着色器对象。你需要传入着色器的类型，例如 `GL_VERTEX_SHADER` 对于顶点着色器，或 `GL_FRAGMENT_SHADER` 对于片段着色器。
@@ -106,9 +108,11 @@ void main()
 
 ## Mesa中的Shader架构
 
-![shader_layer](https://github.com/ddqwd/mesa3d/opengl_no.jpg)
-![Shader_Compiler](https://en.wikipedia.org/wiki/Mesa_%28computer_graphics%29#/media/File:GlassyMesa3D.svg)
 
+![mesa_layers](https://github.com/ddqwd/mesa3d/blob/main/mesa_layers.png)
+![Shader_Compiler](https://github.com/ddqwd/mesa3d/blob/main/mesa3d.png)
+
+值得注意的时,radeonsi是直接从GLSL IR到 tgsi
 
 ## RadeonSI中Shader实现分析(基于mesa-18.3.6)
 
@@ -137,6 +141,7 @@ struct ac_llvm_compiler {
 };
 
 
+```
 ```mermaid
 
 graph TD
@@ -161,51 +166,30 @@ graph TD
 
 ```mermaid
 graph TD
-    glCreateShader --> _mesa_CreateShader
-    _mesa_CreateShader --> glCompileShader
     glCompileShader --> _mesa_CompileShader
     _mesa_CompileShader --> _mesa_compile_shader
     _mesa_compile_shader --> _mesa_glsl_compile_shader
 
 ```
 
-`link_shaders`的主要任务是确保输入着色器集合可以形成一个完整和一致的着色器程序。
 
-1. 检查是否至少有一个着色器连接到程序，如果没有，则链接失败。
+`_mesa_compiler_shader `
 
-2. `shader_cache_read_program_metadata`: 如果启用了着色器缓存，这个函数会尝试从缓存中读取程序元数据，避免了不必要的链接过程。
+1. 在这个函数内，首先调用`disk_cache_compute_key()` 和 `disk_cache_has_key()` 来检查缓存。
 
-3. 将着色器按照其类型（顶点，片段，几何，计算等）进行分类，储存在 `shader_list` 中。
+2. 如果缓存不存在，那么它会创建一个新的`_mesa_glsl_parse_state`对象，并调用`glcpp_preprocess()`进行预处理。
 
-4. `validate_vertex_shader_executable`, `validate_tess_eval_shader_executable`, `validate_geometry_shader_executable`, `validate_fragment_shader_executable`: 这些函数对每个阶段的着色器进行验证，确保着色器在运行时不会产生错误。
+3. 如果预处理成功，接着进行词法和语法解析，分别通过`_mesa_glsl_lexer_ctor()`, `_mesa_glsl_parse()`, `_mesa_glsl_lexer_dtor()`和`do_late_parsing_checks()`完成。
 
-5. `cross_validate_outputs_to_inputs`: 对比每个阶段的输出和下一个阶段的输入，确保一致性。如果发现阶段间接口不匹配，链接会失败。
+4. 然后，如果指定了打印AST，会遍历并打印所有的AST节点。
 
-6. `lower_named_interface_blocks`: 对每个阶段的接口块进行降级处理。
+5. 接着，会通过`_mesa_ast_to_hir()`将AST转换为HIR，并调用`validate_ir_tree()`来验证。
 
-7. `lower_discard_flow`: 对于 GLSL 1.30 及以上版本，以及 GLSL ES 3.00 及以上版本，会对每个阶段的 discard 语句进行降级处理。
+6. 如果没有错误，接着会调用`set_shader_inout_layout()`来设定着色器的输入输出布局。
 
-8. `disable_varying_optimizations_for_sso`: 如果是单独的着色器程序，关闭变化量优化。
+7. 最后，如果没有错误并且着色器IR非空，会执行`assign_subroutine_indexes()`和`lower_subroutine()`对子程序进行处理，并可能调用`opt_shader_and_create_symbol_table()`来优化着
 
-9. `interstage_cross_validate_uniform_blocks`: 对 UBOs 和 SSBOs 进行跨阶段验证。
-
-10. `linker_optimisation_loop`: 在为属性，uniforms 和变量分配存储之前进行优化。后续的优化可能会使一些变量变得无用。
-
-11. `validate_sampler_array_indexing`: 对于一些特殊情况，检查并验证我们是否允许使用循环诱导变量进行采样器数组索引。
-
-12. `validate_geometry_shader_emissions`: 检查并验证几何着色器中的流发射。
-
-13. `store_fragdepth_layout`: 存储 FragDepth 布局。
-
-14. `link_varyings_and_uniforms`: 链接所有的着色器变量和uniforms，并为它们分配存储空间。
-
-15. `optimize_swizzles`: 链接变量可能会生成一些额外的、无用的切换，这个函数会对这些切换进行优化。
-
-16. `validate_ir_tree`: 进行最后的验证步骤，确保 IR 在链接后没有被破坏。
-
-
-
---dump-builder的输出 
+使用glsl_compiler --dump-builder的输出 
 
 ```c++
 ir_variable *const r0001 = new(mem_ctx) ir_variable(glsl_type::vec4_type, "gl_Position", ir_var_shader_out);
@@ -541,7 +525,19 @@ graph TD
 ## si_update_shaders 阶段
 
 这个阶段主要生成vs的prolog和ps的epilog函数，当然如果是monolic架构，还会进行si_compile_tgsi_shader,对此次调试来说已经在linkProgram生成。
-
+```mermaid
+graph TD
+	si_draw_vbo --> si_update_shaders
+	si_update_shaders --> si_shader_select
+	si_shader_select --> si_shader_selector_key_vs
+	si_shader_selector_key_vs --> si_shader_selector_key_hw_vs
+	si_update_shaders --> si_shader_select_with_key
+	si_update_shaders --> si_build_shader_variant
+	si_update_shaders --> si_shader_create
+	si_shader_create --> si_shader_select_vs_parts
+	si_shader_create --> si_shader_binary_upload
+	si_shader_binary_upload --> buffer_unmap
+```
 ```
 si_draw_vbo
 	si_update_shaders
@@ -881,7 +877,7 @@ RadesonSI 通过调用ac_compile_module_to_binary等函数将目标文件的符�
 ```mermaid
 
 graph TD
-    ac_compile_module_to_binary --> si_compile_llvm
+    si_compile_llvm
     si_compile_llvm --> si_llvm_compile
     si_llvm_compile --> ac_compile_module_to_binary
     ac_compile_module_to_binary --> ac_elf_read
