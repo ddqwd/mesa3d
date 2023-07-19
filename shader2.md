@@ -324,7 +324,7 @@ st_translate_vertex_program(struct st_context *st,
 
 `st_translate_vertex_program`     
   | 
-  | `_mesa_insert_mvp_code`：如果顶点程序具有位置不变性（IsPositionInvariant），则插入MVP（Model-View-Projection）代码。该函数可能是Mesa库中的内部函数，根据函数名推测其功能是在顶点程序中插入MVP代码。  
+  | `_mesa_insert_mvp_code`：如果顶点程序具有位置不变性（IsPositionInvariant），则插入MVP（Model-View-Projection）代码。
   | 
   | `_mesa_remove_output_reads`：在ARB_vp（ARB顶点程序）中，移除对输出属性的读取。该函数用于处理ARB_vp中的输出属性。  
   | 
@@ -974,15 +974,14 @@ attributes #0 = { "no-signed-zeros-fp-math"="true" }
 
 设置环境变量
 
-RADEON_DUMP_SHADERS=1  ；禁用异步处理，cache
+RADEON_DUMP_SHADERS=1  MESA_GLSL_CACHE_DIABLE=1；禁用异步处理，shader disk cache
 
 MESA_GLSL=dump  ； 打印相关shader信息
+ 
 
-这样在调试过程中就会打印shader 相关信息。
-
-应用在glCompileShader后可打印
 
 ```bash
+//glCompileShader 後
 
 : GLSL source for vertex shader 1:
 : #version 430
