@@ -236,13 +236,16 @@ glClear 在底层通过blitter clear之后会调用draw_rectangle。这一块会
 
 glLinkProgram 流程过程如下:
 
+```c
 `glLinkProgram`    
      |-`link_program`  
         |-`_mesa_glsl_link_shader`  
+	    |- `link_shaders`
             |-`st_link_shader`  
                 |-`st_program_string_notify`  |-`st_precompile_shader_variant`  |-`st_get_vp_variant`  
                             |-`st_create_vp_variant`  
                                 |-`si_create_shader_selector`  
+```
 
 其中 si_init_shader_selector_async为异步处理。
 
