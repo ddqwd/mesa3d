@@ -5,3 +5,5 @@
 [drm](https://dri.freedesktop.org/docs/drm/)
 
 [x.org_docs](https://www.x.org/docs/)
+
+[xlib-programming ](https://www.niksula.hut.fi/~jkirma/books/xlib.pdf)
