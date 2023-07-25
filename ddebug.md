@@ -38,12 +38,12 @@ u_log_add_auto_logger-->
 si_auto_log_cs -->
 si_log_cs -.add si_log_chunk_type_cs.-> u_log_chunk
 
-si_draw_vbo --> si_log_draw_state
+si_draw_vbo -.current_saved_cs exits .-> si_log_draw_state
 --> si_dump_framebuffer
-si_draw_vbo --> si_dump_gfx_shader 
+si_log_draw_state --> si_dump_gfx_shader 
 si_dump_gfx_shader -.add si_log_chunk_type_shader.-> u_log_chunk 
-si_draw_vbo --> si_dump_descriptor_list
-si_draw_vbo --> si_dump_gfx_descriptors
+si_log_draw_state --> si_dump_descriptor_list
+si_log_draw_state --> si_dump_gfx_descriptors
 si_dump_gfx_descriptors --> si_dump_descriptor_list 
 si_dump_descriptor_list -.add si_log_chunk_type_descriptor_list .-> u_log_chunk 
 
