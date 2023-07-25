@@ -1,8 +1,9 @@
 # si_debug 功能分析
 
 
-这篇文档主要介绍了关于GALLIUM radeonsi中命令流、Shader、描述符列表寄存器相关信息的打印调试功能分析。  
-打印通过一个log_context记录当前的chunk信息  
+这篇文档主要介绍了关于radeonsi中命令流、Shader、描述符列表寄存器相关信息的打印调试功能分析。  
+log调试是单独的一个线程。
+打印通过log_context获取当前的chunk信息  
 si_context创建时会将log_context进行注册。   
 当dd_context_create时会将dd_context中的log绑定到si_context的log  
 每次u_log_flush时都会重置当前的log_context   
