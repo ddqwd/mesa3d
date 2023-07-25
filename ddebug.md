@@ -130,10 +130,22 @@ I --> | ... | K[ ... ]
 
 ## si_log_chunk_type_shader 打印shader
 
-
+这块比较简单就是调用了si_dump_shader， 之前文档有说明
 
 
 ##  si_log_chunk_type_descriptor_list
+
+根据dw_size dump出不同资源的描述符。
+```mermaid
+graph TD
+A[si_log_chunk_type_descriptor_list] --> B{chunk->element_dw_size}
+B --> |case 4: R_008F00_SQ_BUF_RSRC_WORD0 | C[ac_dump_reg]
+B --> |case 8: R_008F10_SQ_IMG_RSRC_WORD0 | C
+B --> | ......  | C
+
+
+``` 
+
 
 
 
