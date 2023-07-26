@@ -618,4 +618,8 @@ void ac_shader_binary_read_config(struct ac_shader_binary *binary,
 
 * [R6xx_R7xx_3D.pdf](https://www.x.org/docs/AMD/old/R6xx_R7xx_3D.pdf)
 
+* [si_programming_guide_v2.pdf](https://www.x.org/docs/AMD/old/si_programming_guide_v2.pdf)
+
+* [SI_3D_registers.pdf](https://www.x.org/docs/AMD/old/SI_3D_registers.pdf)
+
 
