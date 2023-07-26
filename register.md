@@ -614,7 +614,7 @@ void ac_shader_binary_read_config(struct ac_shader_binary *binary,
 
 ## Reference 
 
-* [https://www.amd.com/system/files/TechDocs/southern-islands-instruction-set-architecture.pdf](https://www.amd.com/system/files/TechDocs/southern-islands-instruction-set-architecture.pdf)
+* [southern-islands-instruction-set-architecture.pdf](https://www.amd.com/system/files/TechDocs/southern-islands-instruction-set-architecture.pdf)
 
 * [R6xx_R7xx_3D.pdf](https://www.x.org/docs/AMD/old/R6xx_R7xx_3D.pdf)
 
