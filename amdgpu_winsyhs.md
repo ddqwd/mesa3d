@@ -6,7 +6,7 @@
 
 
 ```mermaid
-amdgpu_bo_init_functions-.初始化ws->base.buffer_create.-> A
+graph TD
 
 A[amdgpu_bo_create] --> 
 B[amdgpu_create_bo]
@@ -43,7 +43,7 @@ G[amdgpu_cs_create] --> C
 H[amdgpu_cs_flush]--> C
 
 
-amdgpu_cs_init_functions -.初始化ws->base._cs_flush, cs_create等.-> H
+
 
 si_flush_dma_cs --> H
 si_flush_gfx_cs --> H
@@ -52,6 +52,8 @@ si_create_context -.构造dma_cs, gfx_cs.-> G
 
 
 ```
+amdgpu_cs_init_functions -.初始化ws->base._cs_flush, cs_create等.-> H
+amdgpu_bo_init_functions-.初始化ws->base.buffer_create.-> A
 si_init_screen_buffer_functions.初始化si_screen的b.resource_create,destro
 buffer_subdata为si_buffer_subdata.
 
@@ -92,29 +94,29 @@ st_init_bufferobj_functions 初始化pipe_screen的screen的BufferData为st_buff
 
 
 ```mermaid
-
-
 graph TD
 	A0[pipe_loader_create_screen] -->A	
-	A[pipe_radeonsi_create_screen]-> B[amdgpu_winsys_create]
+	A[pipe_radeonsi_create_screen] --> B[amdgpu_winsys_create]
 ```
 关于amdgpu_winsys_create 的函数内部流程图
 
 ```mermaid
-	amdgpu_winsys_create --> "调用drmGetVersion验证版本"
-	--> "从dev_table查找winsys"
-	--> "初始化amdgpu设备amdgpu_device_initialize"
-	-->  A {查找一个winsys}
-	A --> |查找成功| ”retaurn ws->base"
-	A --> |重新创建一个winsys"
-	--> "do_init_winsys 初始化"
-	-->  "创建managers"
-	-->  "设置 ws->base.回调函数"
-	--> "amdgpu_bo_init_functions初始化bo函数ws->base.buffer如buffer_map"
-	--> "amdgpu_cs_init_functions初始化命令流函数回调ws->base.cs* 如cs_create为amdgpu_cs_create"
-	--> "amdgpu_surface_init_functions初始化surface回调ws->base.surface_init"
-	--> "创建屏幕screen_create设置ws->base.screen"
-	--> "返回ws->base"
+graph TD
+	AA([开始]) --> B["调用drmGetVersion验证版本"]
+	--> C["从dev_table查找winsys"]
+	--> D[初始化amdgpu设备amdgpu_device_initialize]
+	-->  A{查找一个winsys}
+	A --> |查找成功| E[返回 ws->base] --> PP
+	A --> |失败| F[重新创建一个winsys]
+	--> H[do_init_winsys 初始化]
+	-->  J[创建managers]
+	-->  K[设置 ws->base.回调函数]
+	--> L[amdgpu_bo_init_functions 初始化bo函数ws->base.buffer如buffer_map]
+	--> M[mdgpu_cs_init_functions 初始化命令流函数回调ws->base.cs* 如cs_create为amdgpu_cs_create]
+	--> N[amdgpu_surface_init_functions 初始化surface回调ws->base.surface_init]
+	--> O[创建屏幕screen_create设置ws->base.screen]
+	--> P[返回ws->base]
+    --> PP([END])
 ```
 
 
