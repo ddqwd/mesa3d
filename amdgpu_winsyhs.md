@@ -158,7 +158,7 @@ amdgpu_cretate_bo --> amdgpu_bo_export -->  AAA{switch type}
 AAA -.case flink.-> amdgpu_bo_export_flink
 AAA -.case type kms.->	amdgpu_add_to_table
 AAA -. case dma buf . -> drmPrimeHandleToFD --> drmIoctl
-amdgpu_creat_bo --> amdgpu_add_buffer_to_global_list
+amdgpu_create_bo --> amdgpu_add_buffer_to_global_list
  
 si_context_create -.调用ws->base.ctx_create.-> acc[amdgpu_ctx_create ]-->
 accr[amdgpu_cs_ctx_create]
@@ -216,7 +216,7 @@ amdgpu_cretate_bo --> amdgpu_bo_export -->  AAA{switch type}
 AAA -.case flink.-> amdgpu_bo_export_flink
 AAA -.case type kms.->	amdgpu_add_to_table
 AAA -. case dma buf . -> drmPrimeHandleToFD --> drmIoctl
-amdgpu_creat_bo --> amdgpu_add_buffer_to_global_list
+amdgpu_create_bo --> amdgpu_add_buffer_to_global_list
  
 si_context_create -.调用ws->base.ctx_create.-> acc[amdgpu_ctx_create ]-->
 accr[amdgpu_cs_ctx_create]
@@ -245,10 +245,9 @@ si_init_screen_texture_functions 绑定si_texture_get_handle 到resoruce_get_han
 
 
 
-```mermiad
+```mermaid
 graph TD
 amdgpu_cs_create --> amdgpu_cs_chunk_fence_info_to_data
-
 AA[amdgpu_cs_create]--> A[amdgpu_init_cs_context]
 
 ```
