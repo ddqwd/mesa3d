@@ -2,9 +2,7 @@
 
 # amdgpu winsys分析
 
-## 
-
-
+## buffer_create
 ```mermaid
 graph TD
 amdgpu_bo_init_functions-.初始化ws->base.buffer_create.-> A
@@ -96,7 +94,7 @@ st_init_bufferobj_functions 初始化pipe_screen的screen的BufferData为st_buff
 
 graph TD
 	A0[pipe_loader_create_screen] -->A	
-	A[pipe_radeonsi_create_screen]-> B[amdgpu_winsys_create]
+	A[pipe_radeonsi_create_screen] --> B[amdgpu_winsys_create]
 ```
 关于amdgpu_winsys_create 的函数内部流程图
 
@@ -170,13 +168,13 @@ acc--> amdgpu_bo_cpu_map
 
 
 ```
-amdgpu_cs_add_buffer函数流程图如下
 
+## amdgpu_cs_add_buffer
 
 radeon_add_to_buffer_list --> cs_add_buffer
 
-```
-graph LR
+```mermaid
+graph TD
     A[amdgpu_cs_add_buffer] --> B["检查是否可以快速退出"]
     B --> |是| C[返回 last_added_bo_index]
     B --> |否| D["检查缓冲区是否是稀疏的"]
@@ -209,7 +207,7 @@ bind to ws->base.buffer_map
 
 ```mermaid 
  
-graph LR
+graph TD
 
 amdgpu_create_bo-->amdgpu_bo_alloc -.DRM_AMDGPU_GEM_CREATE.-> drmCommadWriteRead--> Ioctl
 amdgpu_create_bo -.分配虚拟地址空间范围.-> amdgpu_va_range_alloc --> amdgpu_vamgr_find_va
@@ -227,7 +225,8 @@ acc--> amdgpu_bo_alloc
 acc--> amdgpu_bo_cpu_map 
 
 ```
-	这个amdgpu_box_get_handle 绑定到在这个ws->base.buffer_get_handle
+
+这个amdgpu_box_get_handle 绑定到在这个ws->base.buffer_get_handle
 
 si_init_screen_texture_functions 绑定si_texture_get_handle 到resoruce_get_handle
 
@@ -251,7 +250,6 @@ graph TD
 amdgpu_cs_create --> amdgpu_cs_chunk_fence_info_to_data
 
 AA[amdgpu_cs_create]--> A[amdgpu_init_cs_context]
-AA
 
 ```
 
@@ -272,8 +270,8 @@ driDRI2Extension 把这个dri2AllcateBuffer 绑定到allocateBuffer， 不过据
 
 ```mermaid
 graph TD
-	ws->base.cs_get_buffer_list --- amdgpu_cs_get_buffer_list
-	si_save_cs -获取real_buffer保存到bo_list-> amdgpu_cs_get_buffer_list
+	A[ws->base.cs_get_buffer_list] --- amdgpu_cs_get_buffer_list
+	si_save_cs -.获取real_buffer保存到bo_list.-> amdgpu_cs_get_buffer_list
 
 ```
 
@@ -283,7 +281,6 @@ graph TD
 
 graph TD
 
-	//if cs->next_fence -- >
 	amdgpu_cs_get_next_fence -.cs->next_fence exists.-> amdgpu_fence_reference 
 	amdgpu_cs_get_next_fence -.creat new fence .-> amdgpu_fenc_refernce
 
@@ -291,10 +288,8 @@ graph TD
 ### amdgpu_cs_sync_flush 
 
 ```mermaid
-graph   TD
+graph  TD
 	amdgpu_cs_sync_flush --> util_queue_fence_wait -->util_queue_fence_is_singaled
-
-
 ```
 
 ### amdgpU_cs_add_fence_dependency
@@ -360,7 +355,7 @@ bind to ws->base.fence_export_sync_file
 ### amdgpu_export_signalled_sync_file
 
 ```mermaid
-graph TD
+graph LR
 amdgpu_export_signalled_sync_file --> 	amdgpu_cs_create_syncobj2 
 amdgpu_export_signalled_sync_file --> 	amdgpu_cs_syncobj_export_sync_file
 ```
@@ -374,8 +369,8 @@ amdgpu_export_signalled_sync_file --> 	amdgpu_cs_syncobj_export_sync_file
 bind to ws-base.buffer_get_metadata
 bind to ws->base.buffer_set_metadata
 ```mermaid
-
-	A[amdgpu_buffer_set_metadata ]--> amdgpu_bo_set_metadata -.AMDGPU_GEM_METADATA_OP_GET_METADATA.->drmCommandWriteRead --> drmIoctl
+graph LR
+	A[amdgpu_buffer_set_metadata ]--> amdgpu_bo_set_metadata -.AMDGPU_GEM_METADATA_OP_GET_METADATA.-> drmCommandWriteRead --> drmIoctl
 
 ```
 
@@ -387,8 +382,8 @@ bind ws->base.buffer_unmap
 bind to ws->base.buffer_from_handle
 该函数的流程图如下
 ```mermaid
-
-amdgpu_bo_from_handle --> amdgpu_bo_import -.转换一个dma handle到kms handle.-> amdgpu_bo_handle_tyupe_dma_buf_fd
+graph LR
+amdgpu_bo_from_handle --> amdgpu_bo_import -.转换一个dma handle到kms handle.-> amdgpu_bo_handle_tyu=pe_dma_buf_fd
 amdgpu_bo_from_handle --> |根据类型找到带有这个handle的buffer| handle_talbe_lookup 
 amdgpu_bo_from_handle --> |根据类型open the handle DRM_IOCTL_GEM_OPEN | drmIoctl 
 amdgpu_bo_from_handle --> amdgpu_bo_create
