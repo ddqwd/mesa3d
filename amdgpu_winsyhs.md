@@ -7,11 +7,10 @@
 
 ```mermaid
 graph TD
-amdgpu_bo_init_functions -.初始化ws->base.buffer_create.-> A
+amdgpu_bo_init_functions-.初始化ws->base.buffer_create.-> A
 
 A[amdgpu_bo_create] --> 
 B[amdgpu_create_bo]
-
 
 C[amdgpu_get_new_ib]--> D[amdgpu_ib_new_buffer]
 D -->E[buffer_create]
@@ -93,33 +92,36 @@ st_init_bufferobj_functions 初始化pipe_screen的screen的BufferData为st_buff
 
 
 ```mermaid
+
+
 graph TD
 	A0[pipe_loader_create_screen] -->A	
-	A[pipe_radeonsi_create_screen] --> B[amdgpu_winsys_create]
+	A[pipe_radeonsi_create_screen]-> B[amdgpu_winsys_create]
 ```
 关于amdgpu_winsys_create 的函数内部流程图
 
 ```mermaid
 graph TD
-	amdgpu_winsys_create --> "调用drmGetVersion验证版本"
-	--> "从dev_table查找winsys"
-	--> "初始化amdgpu设备amdgpu_device_initialize"
-	-->  A {查找一个winsys}
-	A --> |查找成功| ”retaurn ws->base"
-	A --> |重新创建一个winsys"
-	--> "do_winsys_init 初始化"
-	-->  "创建managers"
-	-->  "设置 ws->base.回调函数"
-	--> "amdgpu_bo_init_functions初始化bo函数ws->base.buffer如buffer_map"
-	--> "amdgpu_cs_init_functions初始化命令流函数回调ws->base.cs* 如cs_create为amdgpu_cs_create"
-	--> "amdgpu_surface_init_functions初始化surface回调ws->base.surface_init"
-	--> "创建屏幕screen_create设置ws->base.screen"
-	--> "返回ws->base"
+	amdgpu_winsys_create --> A1[调用drmGetVersion验证版本]
+	--> A2[从dev_table查找winsys]
+	--> A3[初始化amdgpu设备amdgpu_device_initialize]
+	-->  A{查找一个winsys}
+	A --> |查找成功| A4[retaurn ws->base] --> AAA
+	A --> A5[重新创建一个winsys]
+	--> A6[do_winsys_init 初始化]
+	--> A7[创建managers]
+	-->  A8[设置 ws->base.回调函数]
+	--> A9[amdgpu_bo_init_functions初始化bo函数ws->base.buffer如buffer_map]
+	--> A10[amdgpu_cs_init_functions初始化命令流函数回调ws->base.cs* 如cs_create为amdgpu_cs_create]
+	--> A11[amdgpu_surface_init_functions初始化surface回调ws->base.surface_init]
+	--> A12[创建屏幕screen_create设置ws->base.screen]
+	--> A13[返回ws->base] -->AAA([END])
 ```
 
 
 ```mermaid
-graph TD
+graph LR
+
 	AA[do_winsys_init] --> A 
 
 	A[ac_query_gpu_info]-.获取PCI info .-> drmGetDevice2
@@ -140,21 +142,23 @@ graph TD
 	A -.查询AMDGPU_HW_IP_FW_VCE.-> C[amdgpu_query_firmware_version]
 	A -.查询amdgpu_sw_info_address32_hi.-> amdgpu_query_sw_info
 	A -.查询gds.-> amdgpu_query_gds_info
-	A -.查询memory AMDGPU_INFO_MEMORY.> amdgpu_query_info
+	A -.查询memory AMDGPU_INFO_MEMORY.-> amdgpu_query_info
 	
 	AA --> amdgpu_addr_create --> adddrLib_family_rev_id
 
 	si_get_marketing_name -->amdgpu_get_chip_name -.获取市场名字.-> amdgpu_get_maketing_name
 ```
 
-```mermaid
-graph TD
-amdgpu_create_bo-->amdgpu_bo_alloc -.DRM_AMDGPU_GEM_CREATE.-> drmCommadWriteRead-> Ioctl
+```mermaid 
+ 
+graph LR
+
+amdgpu_create_bo-->amdgpu_bo_alloc -.DRM_AMDGPU_GEM_CREATE.-> drmCommadWriteRead--> Ioctl
 amdgpu_create_bo -.分配虚拟地址空间范围.-> amdgpu_va_range_alloc --> amdgpu_vamgr_find_va
 amdgpu_create_bo --> amdgpu_bo_va_op_raw 
-amdgpu_cretate_bo --> amdgpu_bo_export -->  AAA{switch type }
-AAA -.case flink.->amdgpu_bo_export_flink
-AAA -.case type kms. ->	amdgpu_add_to_table
+amdgpu_cretate_bo --> amdgpu_bo_export -->  AAA{switch type}
+AAA -.case flink.-> amdgpu_bo_export_flink
+AAA -.case type kms.->	amdgpu_add_to_table
 AAA -. case dma buf . -> drmPrimeHandleToFD --> drmIoctl
 amdgpu_creat_bo --> amdgpu_add_buffer_to_global_list
  
@@ -164,6 +168,7 @@ accr[amdgpu_cs_ctx_create]
 acc--> amdgpu_bo_alloc
 acc--> amdgpu_bo_cpu_map 
 
+
 ```
 amdgpu_cs_add_buffer函数流程图如下
 
@@ -172,26 +177,26 @@ radeon_add_to_buffer_list --> cs_add_buffer
 
 ```
 graph LR
-    A[amdgpu_cs_add_buffer] --> B["检查是否可以快速退出"];
-    B --> |是| C[返回 last_added_bo_index];
-    B --> |否| D["检查缓冲区是否是稀疏的"];
-    D --> |否| E["检查缓冲区是否是真实的缓冲区"];
-    E --> |否| F["查找或添加分配缓冲区"];
-    F --> |成功| G["更新缓冲区使用情况"];
-    F --> |失败| H[返回 0];
-    E --> |是| I["查找或添加真实缓冲区"];
-    I --> |成功| J["更新缓冲区使用情况"];
-    I --> |失败| K[返回 0];
-    D --> |是| L["查找或添加稀疏缓冲区"];
-    L --> |成功| M["更新缓冲区使用情况"];
-    L --> |失败| N[返回 0];
-    J --> O["更新 last_added_bo, last_added_bo_index, last_added_bo_usage, last_added_bo_priority_usage"];
-    G --> O;
-    M --> O;
-    O --> P[返回索引];
-    H --> P;
-    K --> P;
-    N --> P;
+    A[amdgpu_cs_add_buffer] --> B["检查是否可以快速退出"]
+    B --> |是| C[返回 last_added_bo_index]
+    B --> |否| D["检查缓冲区是否是稀疏的"]
+    D --> |否| E["检查缓冲区是否是真实的缓冲区"]
+    E --> |否| F["查找或添加分配缓冲区"]
+    F --> |成功| G["更新缓冲区使用情况"]
+    F --> |失败| H[返回 0]
+    E --> |是| I["查找或添加真实缓冲区"]
+    I --> |成功| J["更新缓冲区使用情况"]
+    I --> |失败| K[返回 0]
+    D --> |是| L["查找或添加稀疏缓冲区"]
+    L --> |成功| M["更新缓冲区使用情况"]
+    L --> |失败| N[返回 0]
+    J --> O["更新 last_added_bo, last_added_bo_index, last_added_bo_usage, last_added_bo_priority_usage"]
+    G --> O
+    M --> O
+    O --> P[返回索引]
+    H --> P
+    K --> P
+    N --> P
 
 ```
 
@@ -203,16 +208,24 @@ bind to ws->base.buffer_map
 
 
 ```mermaid 
-A[amdgpu_bo_map] -->  amdgpu_bo_is_erewfrence_by_cs_with_useage .
-A --> amdgpu_bo_wait -bo is shared.-> amdgu_bo_wait_for_idle -.DRM_AMDGPU_GEM_WAIT_IDLE.-> drmCommandWriteRead
+ 
+graph LR
 
-amdgpu_bo_wait -.向cpu请求额获取igpu内存权限.-> amdgpu_bo_cpu_map  -.DRM_AMDGUP_GEM_MMAP.-> drmCommandWriteRead
-amdgpu_bo_cpu_map -.map buffer to gpu mmemory .->drm_map
+amdgpu_create_bo-->amdgpu_bo_alloc -.DRM_AMDGPU_GEM_CREATE.-> drmCommadWriteRead--> Ioctl
+amdgpu_create_bo -.分配虚拟地址空间范围.-> amdgpu_va_range_alloc --> amdgpu_vamgr_find_va
+amdgpu_create_bo --> amdgpu_bo_va_op_raw 
+amdgpu_cretate_bo --> amdgpu_bo_export -->  AAA{switch type}
+AAA -.case flink.-> amdgpu_bo_export_flink
+AAA -.case type kms.->	amdgpu_add_to_table
+AAA -. case dma buf . -> drmPrimeHandleToFD --> drmIoctl
+amdgpu_creat_bo --> amdgpu_add_buffer_to_global_list
+ 
+si_context_create -.调用ws->base.ctx_create.-> acc[amdgpu_ctx_create ]-->
+accr[amdgpu_cs_ctx_create]
 
-A -->pb_cache_release_all_buffers.
+acc--> amdgpu_bo_alloc
+acc--> amdgpu_bo_cpu_map 
 
-
-dr2AllocateBuffer -->AllocateBuffer->si_texture_get_handle -.通过调用winsys的buffer_get_handle.->amdgpu_bo_get_handle --> amdgpu_bo_export 
 ```
 	这个amdgpu_box_get_handle 绑定到在这个ws->base.buffer_get_handle
 
@@ -234,6 +247,7 @@ si_init_screen_texture_functions 绑定si_texture_get_handle 到resoruce_get_han
 
 
 ```mermiad
+graph TD
 amdgpu_cs_create --> amdgpu_cs_chunk_fence_info_to_data
 
 AA[amdgpu_cs_create]--> A[amdgpu_init_cs_context]
@@ -284,7 +298,9 @@ graph   TD
 ```
 
 ### amdgpU_cs_add_fence_dependency
+
 ```mermaid
+graph TD
 
 	amdgpU_cs_add_fence_dependency  --> util_queue_fence_wait 
 	amdgpU_cs_add_fence_dependency  --> add_fence_dependency_entry
@@ -292,7 +308,9 @@ graph   TD
 ```
 
 ### amdgpu_cs_add_syncobj_signal
+
 ```mermaid
+graph TD
 	amdgpu_cs_add_syncobj_singal--> add_syncobj_to_signal_entry 
 
 ```
@@ -304,6 +322,7 @@ graph   TD
 ### amdgpu_fence_reference 
 
 ```mermaid
+graph TD
 
 	amdgpu_fence_reference -.更新引用.-> pipe_reference  --> pipe_reference_described
 	 
@@ -313,6 +332,7 @@ graph   TD
 绑定到ws->base.fence_import_syncobj
 
 ```mermaid
+graph TD
 
 	A[amdgpu_fence_import_syncobj ]-->  pipe_reference_init
 	A -.从fd导入内核同步 对象.->  amdgpu_cs_import_syncobj --> drmSyncobjFDToHandle --> drmIoctl
@@ -324,6 +344,7 @@ graph   TD
 bind to ws->base.fence_import_sync_file
 ```mermaid
 
+graph TD
 	amdgpu_fence_import_sync_file -.转换sync文件为syncobj.-> amdgpu_cs_create_syncobj --> drmSyncobjCreate -.DRM_IOCTL_SYNCOBJ_CREATE.-> drmIoctl
 	amdgpu_fence_import_sync_file --> amdgpu_cs_syncobj_import_sync_file --> drmSyncobjImportSyncFile-.DRM_IOCTL_SYNCOBJ_FD_TO_HANDLE.-> drmIoctl	
 	amdgpu_fence_import_sync_file --> util_queue_fence_init
@@ -339,6 +360,7 @@ bind to ws->base.fence_export_sync_file
 ### amdgpu_export_signalled_sync_file
 
 ```mermaid
+graph TD
 amdgpu_export_signalled_sync_file --> 	amdgpu_cs_create_syncobj2 
 amdgpu_export_signalled_sync_file --> 	amdgpu_cs_syncobj_export_sync_file
 ```
