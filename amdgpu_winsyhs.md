@@ -2,6 +2,125 @@
 
 # amdgpu winsys分析
 
+1. Initialization 
+The following 
+
+## 
+As in all X propgra
+
+	
+
+glXChooseFBConfig -> glXGetFBConfigs -> __glxInitialize
+
+__glxInitialize --> 
+
+dri3_display继承
+
+```graphiz 
+digraph structs {
+    node [shape=record];
+
+    struct_GLXDRIdisplay [label="{__GLXDRIdisplay|destroyDisplay() : void|createScreen() : struct glx_screen*}"];
+    struct_dri3_display [label="{dri3_display|base: __GLXDRIdisplayRec*\nloader_extensions: const __DRIextension**\ndri3Major: int\ndri3Minor: int\nhasPresent: int\npresentMajor: int\npresentMinor: int}"];
+
+    struct_GLXDRIdisplay -> struct_dri3_display [label="base"];
+}
+```
+
+LIBGL_ALWAYS_INDIRECT
+LIBGL_ALWAYS_SOFTWARE
+LIBGL_DRI3_DISABLE
+
+Display *dpy
+
+```graphviz
+digraph {
+
+
+glXChooseFBConfig [style=filled, fillcolor=lightblue]
+state1 [label="",shape=circle]
+state2 [label="",shape=circle]
+state11 [label="",shape=circle]
+state12 [label="",shape=circle]
+state13 [label="",shape=circle]
+
+
+state1 -> __glxInitialize
+
+__glxInitialize -> state11 [arrowhead=normal, penwidth=3, color=red]
+state11 ->  dri3_create_display
+state11 -> state12 [arrowhead=normal, penwidth=3, color=red]
+state12 -> dri2_create_display 
+state12-> state13 [arrowhead=normal, penwidth=3, color=red]
+state13 -> dri_create_display  
+state13 -> state14[arrowhead=normal, penwidth=3, color=red] 
+state14 -> driswCreatDisplay 
+
+glXChooseFBConfig -> state1 [arrowhead=normal, penwidth=3, color=red]
+state1 -> state2   [arrowhead=normal, penwidth=3, color=red]
+state2 -> AllocAndFetchScreenConfigs  
+
+state21 [label="",shape=circle]
+state22 [label="",shape=circle]
+state23 [label="",shape=circle]
+state24 [label="",shape=circle]
+state25 [label="",shape=circle]
+state26 [label="",shape=circle]
+state27 [label="",shape=circle]
+state28 [label="",shape=circle]
+state30 [label="",shape=circle]
+state31 [label="",shape=circle]
+state32 [label="",shape=circle]
+state33 [label="",shape=circle]
+state34 [label="",shape=circle]
+state35 [label="",shape=circle]
+state36 [label="",shape=circle]
+state37 [label="",shape=circle]
+state41 [label="",shape=circle]
+state42 [label="",shape=circle]
+state43 [label="",shape=circle]
+state44 [label="",shape=circle]
+state45 [label="",shape=circle]
+state46 [label="",shape=circle]
+state47 [label="",shape=circle]
+
+AllocAndFetchScreenConfigs -> state21 [label="dri3CreateScreen",arrowhead=normal, penwidth=3, color=red]
+state21 ->  dri3_create_screen
+state21 -> state22  [label="dri3Screen create failed", arrowhead=normal, penwidth=3, color=red]
+state22 -> dri2CreateScreen 
+state22 -> state23[label="dri2Screen create failed", arrowhead=normal, penwidth=3, color=red]
+state23 ->  driCreateScreen 
+state23 -> state24[label="driScreen create failed", arrowhead=normal, penwidth=3, color=red]
+state24 ->  driswCreateScreen 
+state24 ->state25[label="driswScreen create failed", arrowhead=normal, penwidth=3, color=red]
+state25 -> indirect_create_screen 
+
+
+dri3_create_screen -> state31[label="", arrowhead=normal, penwidth=3, color=red]
+state31-> glx_screen_init[label="", arrowhead=normal, penwidth=3, color=red]
+state31 -> state32[label="", arrowhead=normal, penwidth=3, color=red]
+state32 -> loader_dri3_open
+state32 -> state33[label="", arrowhead=normal, penwidth=3, color=red]
+state33 -> loader_get_user_preferred_fd 
+state33 -> state34 [label="", arrowhead=normal, penwidth=3, color=red]
+state34 -> loader_get_driver_for_fd
+state34 -> state35 [label="", arrowhead=normal, penwidth=3, color=red]
+state35 -> driOpenDriver [label="", arrowhead=normal, penwidth=3, color=red]
+state35 -> state36 [label="", arrowhead=normal, penwidth=3, color=red]
+state36 ->  driGetDriverExtensions
+state36 -> state37 [label="", arrowhead=normal, penwidth=3, color=red]
+state37 -> loader_dri3_open [label="", arrowhead=normal, penwidth=3, color=red]
+
+loader_dri3_open-> state41 [label="", arrowhead=normal, penwidth=3, color=red]
+state41 -> sfdas[label="", arrowhead=normal, penwidth=3, color=red]
+
+loader_get_driver_for_fd -> state51 
+
+
+driGetDriverExtensions -> state
+
+`
+
 ## buffer_create
 ```mermaid
 graph TD
