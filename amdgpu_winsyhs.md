@@ -512,3 +512,257 @@ amdgpu_bo_from_handle --> amdgpu_bo_create
 
 
 
+
+
+
+```graphviz
+digraph {
+
+	glXCreateNewContext [style=filled, fillcolor=lightblue]
+	End [label="End"style=filled, fillcolor=lightblue]
+
+	 node [shape=circle];
+
+  state1 [label="state1"];
+  state2 [label="state2"];
+  state11 [label="state11"];
+  state21 [label="state21"];
+  state31 [label="state31"];
+  state32 [label="state32"];
+  state34 [label="state34"];
+  state35 [label="state35"];
+  state36 [label="state36"];
+  state37 [label="state37"];
+  state38 [label="state38"];
+  state39 [label="state39"];
+  state40 [label="state40"];
+  state41 [label="state41"];
+  state42 [label="state42"];
+  state43 [label="state43"];
+  state44 [label="state44"];
+  state45 [label="state45"];
+  state46 [label="state46"];
+  state47 [label="state47"];
+  state48 [label="state48"];
+
+	node[shape=ellipse]
+	dri3cca [label="dri3_create_context_attribs"]
+    gci [label="glx_context_init"]
+	glXCreateNewContext -> state1 [arrowhead=normal, penwidth=3, color=red]
+	state1 -> glXGetFBConfigs 
+	state1 -> state11[arrowhead=normal, penwidth=3, color=red]
+	state11 -> CreateContext [label="创建新的上下文"]
+	
+	CreateContext -> state2[arrowhead=normal, penwidth=3, color=red]
+	state2 -> GetGLXScrenConfigs [label=""]
+	state2 -> state21[arrowhead=normal, penwidth=3, color=red]
+	state21 -> create_context [label="直接渲染"]
+	create_context-> dri3_create_context
+	dri3_create_context-> dri3cca 
+	dri3cca -> state31 [arrowhead=normal, penwidth=3, color=red]
+	state31 -> gci
+	state31 -> state32 [label="image_driver->createContextAttribs",arrowhead=normal, penwidth=3, color=red]
+	state32 -> driCreateContextAttribs
+	
+	driCreateContextAttribs ->  state34 [label="driver->CreateContext",arrowhead=normal, penwidth=3, color=red]
+	state34-> dri_create_context
+
+	dri_create_context -> state35 [label="stapi->create_context",arrowhead=normal, penwidth=3, color=red]
+	state35->st_api_create_context
+
+	st_api_create_context -> state36 [label="smap->screen->context_create",arrowhead=normal, penwidth=3, color=red]
+	state36 ->  si_pipe_create_context
+	si_pipe_create_context-> state37 [arrowhead=normal, penwidth=3, color=red]
+	state37 -> si_create_context
+	si_create_context -> state38  [label="set gfx_cs"][arrowhead=normal, penwidth=3, color=red]
+	state38  -> amdgpu_ctx_create [label="create winsys context"]
+	state38 -> state39[arrowhead=normal, penwidth=3, color=red]
+	state39 -> amdgpu_cs_create [label="create winsys cs "] 
+	state39 -> state40 [label="设置sctx->blitter"][arrowhead=normal, penwidth=3, color=red]
+	state40 -> util_blitter_create
+	state40 -> state41 [arrowhead=normal, penwidth=3, color=red]
+	state41 -> si_begin_new_gfx_cs
+
+	si_begin_new_gfx_cs -> state42 [arrowhead=normal, penwidth=3, color=red]
+	state42 -> si_pm4_emit
+
+	si_pm4_emit -> state43 [arrowhead=normal, penwidth=3, color=red]
+	state43 -> radeon_add_to_buffer_list -> amdgpu_cs_add_buffer
+
+	state36 -> state44[arrowhead=normal, penwidth=3, color=red]
+	state44 -> st_create_context
+
+	st_create_context -> state45[arrowhead=normal, penwidth=3, color=red]
+	state45 -> st_init_driver_functions 
+	state45 -> state46 [arrowhead=normal, penwidth=3, color=red]
+	state46 -> _mesa_initialize_context
+	
+	state46 -> state47[arrowhead=normal, penwidth=3, color=red]
+	state47 -> st_create_context_priv
+	
+	st_create_context_priv -> state48[arrowhead=normal, penwidth=3, color=red]
+	state48 -> cso_create_context [label="further analysis"]
+
+
+
+}
+
+
+
+```
+pipe_loader_drm_probe_fd_nodup -> ss[label="set  dev->base.ops=&pipe_loader_drm_ops"]
+pipe_loader_create_screen -> state1
+state1 -> pipe_loader_load_options
+state1-> state2
+state2-> pipe_loader_drm_create_screen
+pipe_loader_drm_create_screen -> state3
+state3-> pipe_loader_drm_device
+state3->state4 [label="dd->create_screen look up driver_descriptors"]
+state4-> pipe_radeonsi_create_screen
+pipe_radeonsi_create_screen -> amdgpu_winsys_create
+amdgpu_winsys_create ->state5
+state5 ->drmGetVersion 
+state5 -> state6
+state6-> amdgpu_device_initialize
+state6 -> state7 [label="look up a winsys  "]
+state7 -> util_hash_table_get 
+state7 -> state8 [label=" find ws succeed return &ws->base"]
+
+state8 -> state9 [label"create new winsys"]
+
+state9 -> do_winsys_init
+do_winsys_init -> state10
+state10 -> ac_query_gpu_info
+ac_query_gpu_info -> state11
+state11 -> drmGetDevice2
+state11 -> state12
+state12 -> amdgpu_query_gpu_info 
+state12 -> state13 
+
+state13 -> amdgpu_query_hw_ip_info
+state13 -> state14 
+state14 -> amdgpu_query_fireware_version
+state14 -> state15
+state15 -> amdgpu_query_sw_info
+state15 -> state16
+state15 -> amdgpu_query_gds_info
+
+
+state10 -> admgpu_addr_create
+amdgpu_addr_create 
+state10 -> state11
+
+
+state9 -> state16 
+state16 -> radeonsi_screen_create [label="screen_create"] 
+state16 -> state17  [label="set pipe_scren base functions"]
+
+```
+###  glXMakeContext
+
+```
+	node[shape=circle]
+  state1 [label="state1"];
+  state2 [label="state2"];
+  state3 [label="state3"];
+  state4 [label="state4"];
+  state5 [label="state5"];
+  state6 [label="state6"];
+  state7 [label="state7"];
+  state8 [label="state8"];
+  state9 [label="state9"];
+  state10 [label="state10"];
+  state11 [label="state11"];
+  state12 [label="state12"];
+  state13 [label="state13"];
+  state14 [label="state14"];
+  state15 [label="state15"];
+  state16 [label="state16"];
+
+ node[shape=default]
+MakeContextCurrent -> state1[arrowhead=normal, penwidth=3, color=red]
+state1 -> __glXGetCurrentContext
+state1 -> state2[arrowhead=normal, penwidth=3, color=red]
+state2 ->  dri3_bind_context [label="bind"]
+dri3_bind_context -> state3[arrowhead=normal, penwidth=3, color=red]
+state3 -> driReleaseDrawalbes
+state3 -> state4[arrowhead=normal, penwidth=3, color=red]
+state4 -> driBindContext [label="bindContext"]
+driBindContext -> state5 [arrowhead=normal, penwidth=3, color=red]
+state5 ->  dri_make_current
+ dri_make_current -> state6 [arrowhead=normal, penwidth=3, color=red]
+ state6 -> st_api_make_current
+
+ st_api_make_current -> state7 [arrowhead=normal, penwidth=3, color=red]
+ state7 -> state8 [arrowhead=normal, penwidth=3, color=red]
+ state8 -> st_framebuffer_resuse_or_create -> st_framebuffer_create
+ state8 -> state10[arrowhead=normal, penwidth=3, color=red]
+ state10 -> _mesa_make_current 
+ _mesa_make_current -> state12 [arrowhead=normal, penwidth=3, color=red]
+ state12 -> _glapi_set_context
+state12 -> state13 [arrowhead=normal, penwidth=3, color=red]
+state13 -> _glapi_set_dispatch
+state13 -> state14[arrowhead=normal, penwidth=3, color=red]
+state14 -> _mesa_reference_framebuffer
+state14 -> state15 [arrowhead=normal, penwidth=3, color=red]
+state15 -> check_init_viewport
+ state10 -> state11 [arrowhead=normal, penwidth=3, color=red]
+state11 -> st_context_validate
+ state7 -> state9 [label="st is null",arrowhead=normal, penwidth=3, color=red]
+
+ state6 -> state16[arrowhead=normal, penwidth=3, color=red]
+ state16 -> pp_init_fbos [label="allocate the temp FBOs"]
+
+```
+
+```
+node[shape=record]
+
+
+```
+
+
+
+node [shape=circle];
+
+  state1 [label="state1"];
+  state2 [label="state2"];
+  state3 [label="state3"];
+  state4 [label="state4"];
+  state5 [label="state5"];
+  state6 [label="state6"];
+  state7 [label="state7"];
+  state8 [label="state8"];
+  state9 [label="state9"];
+  state10 [label="state10"];
+  state11 [label="state11"];
+  state12 [label="state12"];
+  state13 [label="state13"];
+  state14 [label="state14"];
+  state15 [label="state15"];
+  state16 [label="state16"];
+  state17 [label="state17"];
+  state18 [label="state18"];
+  state19 [label="state19"];
+  state20 [label="state20"];
+  state21 [label="state21"];
+  state22 [label="state22"];
+  state23 [label="state23"];
+  state24 [label="state24"];
+  state25 [label="state25"];
+  state26 [label="state26"];
+  state27 [label="state27"];
+  state28 [label="state28"];
+  state29 [label="state29"];
+  state30 [label="state30"];
+  state31 [label="state31"];
+  state32 [label="state32"];
+  state33 [label="state33"];
+  state34 [label="state34"];
+  state35 [label="state35"];
+  state36 [label="state36"];
+  state37 [label="state37"];
+  state38 [label="state38"];
+  state39 [label="state39"];
+  state40 [label="state40"];
+
