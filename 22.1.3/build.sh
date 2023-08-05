@@ -1,5 +1,7 @@
 #!bin/bash
 
+sudo apt-get  install libxshmfence* libxxf86vm* libxrandr* libelf* libxrandr*         
+
 rm -rf build
 meson build \
     -Dprefix="$PWD"/install \
