@@ -1,0 +1,7 @@
+ libxshmfence* 
+ libxxf86vm*
+ libxrandr* 
+libelf* 
+libxrandr*
+libxdamage*
+libsensors*

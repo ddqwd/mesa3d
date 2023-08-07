@@ -486,6 +486,7 @@ amdgpu_export_signalled_sync_file --> 	amdgpu_cs_syncobj_export_sync_file
 
 bind to ws-base.buffer_get_metadata
 bind to ws->base.buffer_set_metadata
+
 ```mermaid
 graph LR
 	A[amdgpu_buffer_set_metadata ]--> amdgpu_bo_set_metadata -.AMDGPU_GEM_METADATA_OP_GET_METADATA.-> drmCommandWriteRead --> drmIoctl
@@ -721,8 +722,6 @@ node[shape=record]
 
 ```
 
-
-
 node [shape=circle];
 
   state1 [label="state1"];
@@ -765,4 +764,49 @@ node [shape=circle];
   state38 [label="state38"];
   state39 [label="state39"];
   state40 [label="state40"];
+
+node[shape=default]
+
+dri_screen_create
+dri_screen_create_sw
+
+// env:: GBM_ALWAYS_SOFTWARE 
+dri_device_create->dri_screen_create->dri_screen_create_dir2 -> dri_load_driver -> dri_open_driver-> loader_open_driver->
+loader_open_driver_lib
+
+dri_device_create ->dri_screen_create_sw->dri_screen_create_dir2
+
+gbm_create_device->_gbm_create_devicee->find_backend ->builtin_backends-> dri_device_create
+dri2_initialize -> dri2_initilize_drm-> gbm_create_device
+egl_Initialize-> _eglDriver-> dri2_initialize
+
+
+
+
+R600_DEBUG=info
+
+
+
+   74      typedef struct _GB_ADDR_CONFIG_T {
+   75           unsigned int                                : 1;
+   76           unsigned int num_lower_pipes                : 1;
+   77           unsigned int row_size                       : 2;
+   78           unsigned int                                : 2;
+   79           unsigned int multi_gpu_tile_size            : 2;
+   80           unsigned int                                : 1;
+   81           unsigned int num_gpus                       : 3;
+   82           unsigned int                                : 1;
+   83           unsigned int shader_engine_tile_size        : 3;
+   84           unsigned int                                : 2;
+   85           unsigned int num_shader_engines             : 2;
+   86           unsigned int                                : 1;
+   87           unsigned int bank_interleave_size           : 3;
+   88           unsigned int                                : 1;
+   89           unsigned int pipe_interleave_size           : 3;
+   90           unsigned int                                : 1;
+   91           unsigned int num_pipes                      : 3;
+   92      } GB_ADDR_CONFIG_T;
+
+
+
 
