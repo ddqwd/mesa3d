@@ -1,0 +1,464 @@
+   digraph {
+     
+   
+ 
+ 
+    subgraph cluster_glx_context_vtable {
+
+         label = "glx_context_vtable 虚函数"
+
+          destroy
+        bind
+       unbind
+ 
+   }
+    
+    subgraph cluster_dr2_context_vtable {
+
+        label = "dr2_context_vtable"
+        dri2_bind_context
+        dri2_destory_context
+
+    }
+ 
+
+ 
+    
+    subgraph cluster_dri_context_vtable {
+
+        label = "dri_context_vtable"
+        dri_bind [label="dri_bind_context"] 
+        
+    }
+
+
+ 
+
+
+    bind->dri2_bind_context
+    bind->dri3_bind_context
+    bind->drisw_bind
+
+
+
+
+
+    "dri*_create_context"-> glx_context_vtable 
+     [label="初始化gl_context vtable"]
+
+
+
+
+
+    // subgraph cluster_glx {
+    //     style=dashed
+
+    //     glXCreateNewContext
+    //     CreateContext
+    //     MakeContextCurrent
+    //     dri3_bind_context 
+    // }
+
+    style =dashed
+
+    subgraph cluster_glxcurrent {
+        label = "glxcurrent.c"
+        MakeContextCurrent
+    }
+    subgraph cluster_glx_cmds {
+
+        label = "glxcmds.c"
+
+        glXCreateNewContext 
+        CreateContext
+
+        glXChooseFBConfig
+        glXGetFBConfigs
+    }
+    subgraph cluster_glxext {
+
+        label = "glxext.c"
+
+        __glXInitialize
+        AllocAndFetchScreenConfigs
+    }
+    subgraph cluster_dri3_glx {
+        label = "dri3_glx.c"
+
+
+        dri3_create_screen
+
+        dri3_create_context 
+        dri3_create_context_attribs
+
+        
+        dri3_bind_context
+
+        dri3_create_drawable
+
+    }
+
+    subgraph cluster_dri2  {
+        label = "dr2.c"
+        dri2_init_screen
+
+        dri2_allocate_textures->
+        dri_image_drawable_get_buffers
+
+        dri2_create_image ->
+        dri2_create_image_common 
+
+
+        dri2_create_buffer
+    }
+    
+    subgraph cluster_dri_util {
+
+
+        label ="dri_util.c"
+
+        driCreateNewScreen2
+        
+        driBindContext
+        driCreateContextAttribs
+        driCreateNewDrawable
+    } 
+    subgraph cluster_dri_common {
+        label="dri_common.c"
+        driFetchDrawable
+    }
+     subgraph cluster_dri_context{
+
+
+        label ="dri_context.c"
+
+        dri_create_context
+        dri_make_current
+
+        
+    }
+
+    subgraph cluster_amdgpu_winsys {
+        label = "amdgpu_winsys.c" 
+        amdgpu_winsys_create
+    }
+
+    subgraph cluster_drm_helper {
+        label="drm_helper.h"
+        pipe_radeonsi_create_screen
+    }
+    subgraph cluster_pipe_loader {
+        label ="pipe_loader.c"
+
+        pipe_loader_create_screen
+    }
+
+    subgraph cluster_loader_dri3_helper {
+
+        label ="loader_dri3_helper.c"
+        loader_dri3_get_buffers->
+        dri3_get_buffer->
+        dri3_alloc_render_buffer
+
+        loader_dri3_drawable_init
+    }
+    subgraph cluster_st_manager{
+
+        style=dashed
+        label="st_manager.c"
+
+        st_api_create_context
+        st_api_make_current 
+        st_framebuffer_validate
+        st_api_make_current-> st_framebuffer_validate
+
+
+    }
+
+    subgraph cluster_st_context {
+
+        label = "st_context.c"
+        st_create_context
+        st_create_context_priv
+        _vbo_CreateContext
+
+        st_create_context -> st_init_driver_functions
+        st_create_context -> st_create_context_priv
+        st_create_context_priv-> _vbo_CreateContext
+
+        
+    }
+
+    subgraph cluster_dri_drawable {
+        label="dri_drawable.c"
+        dri_st_framebuffer_validate
+        dri_create_buffer
+    }
+    subgraph cluster_st_cb_bufferobjects {
+
+        label ="st_cb_bufferobjects.c"
+
+        st_init_bufferobject_functions
+
+        st_bufferobj_alloc -> 
+        _mesa_initialize_buffer_object
+
+        st_bufferobj_data -> bufferobj_data
+    }
+
+    subgraph cluster_context {
+
+        label ="context.c"
+
+        _mesa_initialize_context
+        _mesa_make_current
+        _mesa_alloc_dispatch_table
+        _mesa_new_nop_table
+        create_beginend_table
+
+
+        _mesa_initialize_dispatch_tables
+
+
+        _mesa_initialize_context-> _mesa_alloc_dispatch_table [label=" Creates a minimal dispatch table for use within glBegin()/glEnd()."]
+
+         _mesa_initialize_context-> create_beginend_table [label="initilize OutsideBeginEnd Exec Save"]
+
+         create_beginend_table-> _mesa_loopback_init_api_table 
+
+        _mesa_alloc_dispatch_table -> _mesa_new_nop_table
+    }
+
+    subgraph cluster_mapi_glapi {
+        label = "mapi_glapi.c"
+        _glapi_set_dispatch
+    }  
+    subgraph cluster_api_exec {
+        label ="api_exec.c"
+        _mesa_initialize_exec_table
+    }
+    subgraph cluster_u_current {
+
+        label="u_current.c"
+        u_current_set_table
+    }
+    subgraph cluster_dlist {
+
+        label = "dlist.c"
+
+        _mesa_initialize_save_table
+
+    }
+
+
+
+
+
+
+    subgraph cluster_bufferobj {
+
+        label="bufferobj.c"
+
+        // glGenBuffer
+        _mesa_GenBuffers-> create_buffers_err
+        create_buffers_err -> create_buffers
+
+
+        // glBindBuffer
+        _mesa_BindBuffer -> get_buffer_target [label=" 1 &ctx->Array.ArrayBufferObj"]
+        _mesa_BindBuffer -> bind_buffer_object [ label="2"]
+        bind_buffer_object -> _mesa_lookup_bufferobj
+        bind_buffer_object -> _mesa_handle_bind_buffer_gen
+        bind_buffer_object->_mesa_reference_buffer_object
+
+
+        // glBufferData
+        _mesa_BufferData -> get_buffer
+        _mesa_BufferData -> _mesa_buffer_data
+        _mesa_buffer_data-> get_buffer_target
+        _mesa_buffer_data-> buffer_data_error
+        buffer_data_error -> buffer_data 
+        buffer_data -> _mesa_buffer_unmap_all_mappings
+        _mesa_buffer_unmap_all_mappings-> _mesa_bufferobj_mapped
+
+       
+    }
+
+    subgraph cluster_hash {
+
+        label = "hash.c"
+
+        _mesa_HashLookup
+        _mesa_HashInsertLocked
+        _mesa_HashInsert
+        _mesa_HashInsert_unlocked
+        _mesa_HashInsert -> _mesa_HashInsert_unlocked
+    }
+
+    subgraph cluster_u_inlines {
+
+        label="u_inlines.h"
+        pipe_buffer_create
+        pipe_resource_reference
+    }
+
+    
+
+    subgraph cluster_si_pipe {
+
+        label="si_pipe.c"
+
+
+        radeonsi_screen_create
+        si_pipe_create_context -> 
+        si_create_context
+
+
+        si_init_compiler
+
+
+
+    }
+
+    subgraph cluster_si_buffer {
+        label="si_buffer.c"
+        si_buffer_create
+        
+    }
+
+    subgraph cluster_si_texture {
+        label="si_texture.c"
+        si_texture_create   -> 
+        si_texture_create_object
+    }
+    subgraph cluster_ac_llvm_util {
+        label ="ac_llvm_util.c"
+        ac_init_llvm_once
+        ac_init_llvm_compiler 
+	     
+
+    }
+
+       subgraph cluster_ac_llvm_helper {
+        label ="ac_llvm_helper.c" 
+	    ac_create_llvm_passes 
+
+    }
+
+    subgraph cluster_amdgpu_bo
+    {
+
+        label ="amdgpu_bo.c"
+        amdgpu_bo_create
+        amdgpu_bo_get_va
+    }
+    // glxinitialize 
+    glXChooseFBConfig -> glXGetFBConfigs
+    glXGetFBConfigs -> __glXInitialize
+    __glXInitialize -> AllocAndFetchScreenConfigs
+    AllocAndFetchScreenConfigs-> dri3_create_screen 
+    dri3_create_screen-> driOpenDriver-> megadriver_stub_init
+    megadriver_stub_init ->
+    __driDriverGetExtensions_radeonsi [label="裝載__driDriverExtensions"]
+    dri3_create_screen -> driGetDriverExtensions -> "dlsym(__DRI_DRIVER_EXTENSIONS)"
+    dri3_create_screen -> driCreateNewScreen2
+    driCreateNewScreen2 -> dri2_init_screen
+    dri2_init_screen->pipe_loader_create_screen
+    pipe_loader_create_screen-> pipe_radeonsi_create_screen
+    pipe_radeonsi_create_screen-> amdgpu_winsys_create 
+    amdgpu_winsys_create -> radeonsi_screen_create
+    radeonsi_screen_create -> si_create_context
+    si_create_context-> pipe_buffer_create
+    pipe_buffer_create-> si_buffer_create
+     si_create_context -> si_init_buffer_functions;
+	 si_create_context -> si_init_clear_functions
+	 si_create_context -> si_init_blit_functions
+	 si_create_context -> si_init_compute_functions
+	 si_create_context -> si_init_compute_blit_functions
+	 si_create_context -> si_init_debug_functions
+	 si_create_context -> si_init_msaa_functions
+	 si_create_context -> si_init_streamout_functions
+
+     si_create_context -> si_init_compiler
+
+     si_init_compiler-> ac_init_llvm_once
+     ac_init_llvm_once-> ac_init_llvm_target
+     si_init_compiler -> ac_init_llvm_compiler
+     ac_init_llvm_compiler -> ac_create_target_machine
+    ac_init_llvm_compiler -> ac_create_passmgr
+
+     si_init_compiler ->ac_create_llvm_passes
+     ac_create_llvm_passes-> addPassesToEmitFile
+
+    // 创建context
+    glXCreateNewContext ->  CreateContext 
+    CreateContext ->dri3_create_context
+    dri3_create_context -> driCreateContextAttribs 
+    driCreateContextAttribs-> dri_create_context
+    dri3_create_context_attribs -> dri_create_context
+    dri_create_context -> st_api_create_context
+    st_api_create_context -> st_create_context 
+    st_api_create_context -> si_pipe_create_context
+    st_create_context -> _mesa_initialize_context 
+    st_init_bufferobject_functions -> st_init_bufferobject_functions
+
+    st_create_context_priv   -> _mesa_initialize_dispatch_tables
+    _mesa_initialize_dispatch_tables -> _mesa_initialize_exec_table
+    _mesa_initialize_dispatch_tables -> 
+    _mesa_initialize_save_table
+
+
+    MakeContextCurrent -> dri3_bind_context
+    dri3_bind_context -> driFetchDrawable->dri3_create_drawable->
+    loader_dri3_drawable_init-> driCreateNewDrawable->dri_create_buffer->
+    dri_create_buffer
+
+    dri3_bind_context -> driBindContext
+    driBindContext -> dri_make_current 
+    dri_make_current-> st_api_make_current 
+    st_api_make_current -> _mesa_make_current 
+    _mesa_make_current -> _glapi_set_dispatch
+    _glapi_set_dispatch -> u_current_set_table
+     
+    dri2_create_image_common -> si_texture_create
+    si_texture_create_object -> si_alloc_resource
+    dri3_alloc_render_buffer->  dri2_create_image
+    st_framebuffer_validate->dri_st_framebuffer_validate
+    dri_st_framebuffer_validate->dri2_allocate_textures
+
+    dri_image_drawable_get_buffer->loader_dri3_get_buffers
+
+
+    // glGenBuffers
+    glGenBuffers [color=red]
+    glGenBuffers->_mesa_GenBuffers 
+    create_buffers -> _mesa_HashInsertLocked
+
+    // glBindBuffer
+    glBindBuffer [color=red]
+    glBindBuffer -> _mesa_BindBuffer
+    _mesa_lookup_bufferobj->_mesa_HashLookup
+     _mesa_reference_buffer_object -> st_bufferobj_alloc  [label= "buffer object is dummy "]
+    _mesa_reference_buffer_object ->_mesa_HashInsert
+
+    //glBufferData
+    buffer_data -> st_bufferobj_data
+    bufferobj_data -> pipe_resource_reference
+    bufferobj_data ->  si_resource_create
+    si_resource_create -> si_buffer_create [label="target == PIPE_BUFFER"]
+    si_resource_create-> si_texture_create 
+    si_buffer_create -> si_init_resource_fields
+    si_buffer_create -> si_alloc_resource
+    si_alloc_resource -> amdgpu_bo_create
+    amdgpu_bo_create -> amdgpu_create_bo
+    si_alloc_resource-> amdgpu_bo_get_va
+
+
+    // glCompileShader
+
+
+
+    // glLinkProgram
+
+    
+ } 
