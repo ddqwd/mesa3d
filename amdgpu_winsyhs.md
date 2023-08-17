@@ -120,6 +120,12 @@ loader_get_driver_for_fd -> state51
 driGetDriverExtensions -> state
 
 `
+ 
+
+```
+si_init_screen_buffer_functions.初始化si_screen的b.resource_create,destro
+buffer_subdata为si_buffer_subdata.
+
 
 ## buffer_create
 ```mermaid
@@ -167,11 +173,7 @@ si_flush_gfx_cs --> H
 
 si_create_context -.构造dma_cs, gfx_cs.-> G
 
-
 ```
-si_init_screen_buffer_functions.初始化si_screen的b.resource_create,destro
-buffer_subdata为si_buffer_subdata.
-
 ### 关于`_mesa_BufferData_no_error` 
 
 在OpenGL中，可以通过调用`glGetError`函数来获取OpenGL的错误状态。默认情况下，OpenGL会在出现错误时自动将错误状态设置，并且在出现错误后会导致OpenGL函数调用的立即返回。这样可以帮助开发者快速发现和解决问题。
