@@ -14,6 +14,8 @@ https://epdf.tips/queue/advanced-linux-3d-graphics-programming.html
 https://theswissbay.ch/pdf/Gentoomen%20Library/Game%20Development/Programming/
 https://vdoc.pub/documents/linux-3d-graphics-programming-1ch3hiiu532g
 
-https://nibmehub.com/opac-service/pdf/read/Advanced%20Linux%203D%20Graphics%20Programming.pdf
+[Advanced_linux_3d_graphics_programming](https://nibmehub.com/opac-service/pdf/read/Advanced%20Linux%203D%20Graphics%20Programming.pdf)
 [Real-Time Rendering 4th Edition ](https://blog.csdn.net/qq_26625581/article/details/122054608)
+
+[Advanced_Graphics_Programming-EN](http://www.r-5.org/files/books/computers/algo-list/realtime-3d/Tom_McReynolds-Advanced_Graphics_Programming-EN.pdf)
 
