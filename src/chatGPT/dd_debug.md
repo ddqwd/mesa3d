@@ -1,0 +1,22 @@
+dd_after_draw
+	dd_after_draw_async | add log_contxt->cur_page to dd_draw_record's log_page
+		
+
+
+dd_context_blit
+dd_context_buffer_subdata
+dd_context_clear
+dd_context_clear_buffer
+dd_context_clear_depth_stencil
+dd_context_clear_render_target
+dd_context_clear_texture
+dd_context_draw_vbo
+dd_context_flush_resource
+dd_context_generate_mipmap
+dd_context_launch_grid
+dd_context_resource_copy_region
+dd_context_texture_subdata
+dd_context_transfer_flush_region
+dd_context_transfer_map
+dd_context_transfer_unmap
+

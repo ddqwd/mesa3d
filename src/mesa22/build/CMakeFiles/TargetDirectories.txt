@@ -1,0 +1,3 @@
+/home/shiji/mesa3d/mesa3d/src/mesa22/build/CMakeFiles/draw.dir
+/home/shiji/mesa3d/mesa3d/src/mesa22/build/CMakeFiles/edit_cache.dir
+/home/shiji/mesa3d/mesa3d/src/mesa22/build/CMakeFiles/rebuild_cache.dir

@@ -1,3 +1,102 @@
+
+## dd_debug
+gallium 有关调试代码的目录
+
+`gallium/auxilliary`
+
+分为四种，层层递进
+分别是ddebug, rbug,trace, noop
+
+这个在winsys创建完后调用debug_screen_wrap进行各个debug 上下文创建及初始化,每个debug的context都位于一个单独的线程。
+pipe_radeonsi_create_screen
+	amdgpu_winsys_create
+	debug_screen_wrap       -----------   GALLIUM_TESTS
+		ddebug_screen_create    ----------- GALLIUM_DEBUG GALLIUM_DDEBUG_SKIP
+		rbug_screen_create
+		trace_screen_create
+		noop_screen_create
+
+
+
+```
+digraph screen {
+	node[shape=rectangle]
+	subgraph cluster_dd_screen {
+		label="dd_screen"
+        A [label="pipe_screen base"]
+		B [label="pipe_screen* screen"]
+	}
+
+	subgraph cluster_st_manager {
+
+		label="st_manager"
+
+		AA[label="pipe_screen *screen"]
+
+	}
+
+	subgraph cluster_dri_screen {
+		label="dri_screen"
+		A1[label="st_manager base"]
+	}
+	A -> pipe_screen
+	B -> si_screen	
+}
+
+
+
+
+
+
+
+
+
+
+```
+
+dd_screen_context_create
+	dd_context_create
+		dd_thread_main
+
+
+
+
+
+## ddebug
+
+GALLIUM_DDEBUG=t
+
+
+## rbug
+需要设置 GALLIUM_RBUG=t
+这个用于远程调试， 利用tcp的方式转发指令
+
+## trace
+
+GALLIUM_TRACE=t
+
+## noop
+
+GALLIUM_NOOP=t
+
+
+## ddebug
+
+### ddebug线程创建
+
+
+ddebug线程创建是在dd_context_create中创建
+
+pipe_radeonsi_create_screen  
+	debug_screen_wrap       -----------   GALLIUM_TESTS  
+		ddebug_screen_create    ----------- GALLIUM_DEBUG GALLIUM_DDEBUG_SKIP  
+			dd_screen_context_create  
+				dd_context_create           ------------------ **进行实际线程创建**  
+		rbug_screen_create         -------- 用于rbug  
+		trace_screen_create        -----------用于trace  
+		noop_screen_create      -------------- 用于noop 
+
+
 # si_debug 功能分析
 
 
@@ -146,6 +245,31 @@ B --> | ......  | C
 
 
 ``` 
+
+## 
+
+dd_after_draw
+	dd_after_draw_async | add log_contxt->cur_page to dd_draw_record's log_page
+		
+
+
+dd_context_blit
+dd_context_buffer_subdata
+dd_context_clear
+dd_context_clear_buffer
+dd_context_clear_depth_stencil
+dd_context_clear_render_target
+dd_context_clear_texture
+dd_context_draw_vbo
+dd_context_flush_resource
+dd_context_generate_mipmap
+dd_context_launch_grid
+dd_context_resource_copy_region
+dd_context_texture_subdata
+dd_context_transfer_flush_region
+dd_context_transfer_map
+dd_context_transfer_unmap
+
 
 
 

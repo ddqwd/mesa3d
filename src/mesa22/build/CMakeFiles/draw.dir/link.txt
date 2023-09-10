@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/draw.dir/draw.cpp.o -o draw  -lGL -lglut 

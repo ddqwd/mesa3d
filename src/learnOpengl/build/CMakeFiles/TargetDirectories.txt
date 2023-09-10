@@ -1,0 +1,4 @@
+/home/shiji/mesa3d/mesa3d/src/learnOpengl/build/CMakeFiles/demo.dir
+/home/shiji/mesa3d/mesa3d/src/learnOpengl/build/CMakeFiles/texture.dir
+/home/shiji/mesa3d/mesa3d/src/learnOpengl/build/CMakeFiles/edit_cache.dir
+/home/shiji/mesa3d/mesa3d/src/learnOpengl/build/CMakeFiles/rebuild_cache.dir

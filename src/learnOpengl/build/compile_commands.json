@@ -1,0 +1,22 @@
+[
+{
+  "directory": "/home/shiji/mesa3d/mesa3d/src/learnOpengl/build",
+  "command": "/usr/bin/cc  -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./include -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./learnopengl -g -o CMakeFiles/demo.dir/src/glad.c.o -c /home/shiji/mesa3d/mesa3d/src/learnOpengl/src/glad.c",
+  "file": "/home/shiji/mesa3d/mesa3d/src/learnOpengl/src/glad.c"
+},
+{
+  "directory": "/home/shiji/mesa3d/mesa3d/src/learnOpengl/build",
+  "command": "/usr/bin/c++  -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./include -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./learnopengl -g -o CMakeFiles/demo.dir/create_window.cpp.o -c /home/shiji/mesa3d/mesa3d/src/learnOpengl/create_window.cpp",
+  "file": "/home/shiji/mesa3d/mesa3d/src/learnOpengl/create_window.cpp"
+},
+{
+  "directory": "/home/shiji/mesa3d/mesa3d/src/learnOpengl/build",
+  "command": "/usr/bin/cc  -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./include -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./learnopengl -g -o CMakeFiles/texture.dir/src/glad.c.o -c /home/shiji/mesa3d/mesa3d/src/learnOpengl/src/glad.c",
+  "file": "/home/shiji/mesa3d/mesa3d/src/learnOpengl/src/glad.c"
+},
+{
+  "directory": "/home/shiji/mesa3d/mesa3d/src/learnOpengl/build",
+  "command": "/usr/bin/c++  -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./include -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./learnopengl -g -o CMakeFiles/texture.dir/texture.cpp.o -c /home/shiji/mesa3d/mesa3d/src/learnOpengl/texture.cpp",
+  "file": "/home/shiji/mesa3d/mesa3d/src/learnOpengl/texture.cpp"
+}
+]
