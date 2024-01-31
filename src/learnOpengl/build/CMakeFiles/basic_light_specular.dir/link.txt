@@ -1,0 +1,1 @@
+/usr/bin/c++ -g -rdynamic CMakeFiles/basic_light_specular.dir/src/glad.c.o CMakeFiles/basic_light_specular.dir/basic_light_specular.cpp.o -o basic_light_specular  -lglfw -lGL -lX11 -lpthread -lXrandr -lXi -ldl 

@@ -1,15 +1,15 @@
-## RadeonSI寄存器分析 
+# RadeonSI寄存器分析 
 
 首先分管线中各个阶段他们的设置使用到的寄存器。
 
-## 3D Engine Programing 中的寄存器配置
+# 3D Engine Programing 中的寄存器配置
 
 在R6xx_R7xx_3D.pdf该书中寄存器配置分为   CP , PA ,SQ ,Vertex resource , Texture , Shader , 	SPI ,	 DB, CB , Draw,.
 
 不过在South Islands中， 已经移除所有的常量硬件寄存器， 把这些资源放在内存中。 所以关于这些Vertex resource ,Texture寄存器已经被 **Shader Resource Descriptors (SRD)** 代替。 这类寄存器有SHADER BUFFER RESOURCE DESCRIPTOR， SHADER IMAGE RESOURCE DESCRIPTOR ， SHADER IMAGE RESOURCE SAMPLER DESCRIPTOR 。
 接下来逐个分析各类寄存器
 
-###  CP（Command Processor) setup
+# CP（Command Processor) setup
 
 CP微码必须加载，并且必须像以前的芯片一样初始化环形缓冲区以及读写指针，然后才能使用CP。R6xx/R7xx芯片与以前的一代芯片不同，因为必须为CP微引擎（ME）和CP预取解析器（PFP）分别加载微码。
 
@@ -28,11 +28,11 @@ CP微码必须加载，并且必须像以前的芯片一样初始化环形缓冲
 
 比较过程仅在每次写入CP_COHER_BASE寄存器时发生。
 
-### VGT(Vertex Grouper Tessellattor ) Setup 
+# 1. VGT(Vertex Grouper Tessellattor ) Setup 
 
 这个对应Vertex Grouper and Tessellator Registers 
 
-#### IA_ENHANCE (0x28a70) 
+## IA_ENHANCE (0x28a70) 
 
 "Late Additions of Control Bits"（晚期添加控制位）这个术语在计算机硬件或数字设计的上下文中，指的是在系统或电路的设计后期，将额外的控制信号或位加入到系统中的做法。
 
@@ -437,8 +437,9 @@ VGT_GS_MAX_VERT_OUT寄存器用于控制GS输出的顶点数量。在不同的�
 
 
 ```mermaid
+graph LR
 si_shader_init_pm4_state --> si_shader_vs
-si_init_shader_selector_async-->
+si_init_shader_selector_async -->
 si_shader_vs --> si_emit_shader_vs
 si_emit_shader_vs --> radeon_opt_set_context_reg
 
@@ -634,7 +635,7 @@ VGT_LS_HS_CONFIG是一个可读写寄存器，占据32位，用于指定LS/HS（
 通过写入这些字段，可以指定LS/HS的控制值。
 
 ```mermaid
-
+graph LR
 si_draw_vbo-->
 si_emit_all_states --> si_emit_derived_tess_state-->
 radeon_set_context_reg_idx
@@ -891,7 +892,7 @@ VGT:VGT_STRMOUT_BUFFER_CONFIG是一个可读写寄存器，占据32位，用于�
 
 
 该寄存器使用流程同VGT_ES_PER_GS
- 
+
  
 
 #### VGT_STRMOUT_BUFFER_SIZE_0-3
@@ -1132,7 +1133,7 @@ VGT:VGT_VTX_CNT_EN 是一个可读写寄存器，占据32位，用于在复用�
 | 字段名称   | 位    | 默认值 | 描述                                                                                           |
 |-------------|--------|---------|--------------------------------------------------------------------------------------------------|
 | VTX_CNT_EN | 0      | none    | 如果启用自动索引生成，则将此字段设置为1。这是为了通过顶点着色器在y通道上导入的索引。这与DRAW_INDEX_AUTO不同。  |
- 
+
 这个字段的详细说明如下：
 
 - VTX_CNT_EN字段（0）：用于启用或禁用自动索引生成。在复用模式下，当设置为1时，自动索引值将被生成，并存储在第一个向量输出的y分量中。自动索引值是一个在特定条件下自动生成的索引，它用于优化图形渲染过程中的顶点处理。
@@ -1183,7 +1184,7 @@ PA:PA_CL_CLIP_CNTL 是一个可读写寄存器，占据32位，用于控制裁�
 
 
 ```mermaid
-
+graph LR
 
 si_init_state_functions -->  |设置si_context atoms.s.clip_regs.emit| si_emit_clip_regs
 
@@ -1424,7 +1425,7 @@ TODO
 TODO
 
 |
-## Shader Program Registers
+# Shader Program Registers
 
 
 在GCN 硬件阶段可分为LS,HS, ES,GS,VS,PS
@@ -1579,6 +1580,1238 @@ TMA和TBA都用在Scalar ALU Operations 中。
 
 
 ##  SPI Registers
+
+
+### SPI:SPI_ARB_CYCLES_0 · [R/W] · 32 bits · Access: 32 · GpuF0MMReg:0x90f4
+
+**DESCRIPTION:** 这个寄存器用于控制时间分片（Timeslice）的时长，其粒度为 16 个时钟周期。它允许在1GHz时钟频率下设置时间分片的持续时间，范围从16纳秒到1毫秒。应以广播方式写入，并分别存储在每个SE中。
+
+以下是字段的定义：
+
+| 字段名称       | 位范围  | 默认值 | 描述                                   |
+|---------------|---------|--------|----------------------------------------|
+| TS0_DURATION  | 15:0    | 0x0    | Timeslice 0 的持续时间（时钟周期）。   |
+| TS1_DURATION  | 31:16   | 0x0    | Timeslice 1 的持续时间（时钟周期）。   |
+
+这些字段允许配置两个不同时间分片的持续时间，以便在GPU操作中进行精确的时间控制。
+
+### SPI:SPI_ARB_CYCLES_1 · [R/W] · 16 bits · Access: 16 · GpuF0MMReg:0x90f8
+
+**DESCRIPTION:** 该寄存器用于控制时间分片（Timeslice）的时长，其粒度为 16 个时钟周期。它允许在1GHz时钟频率下设置时间分片的持续时间，范围从16纳秒到1毫秒。应以广播方式写入，并分别存储在每个SE（Shader Engine）中。
+
+以下是字段的定义：
+
+| 字段名称       | 位范围  | 默认值 | 描述                                   |
+|---------------|---------|--------|----------------------------------------|
+| TS2_DURATION  | 15:0    | 0x0    | Timeslice 2 的持续时间（时钟周期）。   |
+
+这个字段允许配置第三个不同时间分片的持续时间，以便在GPU操作中进行更精确的时间控制。
+
+
+### SPI:SPI_ARB_PRIORITY · [R/W] · 16 bits · Access: 16 · GpuF0MMReg:0x90f0
+
+**DESCRIPTION:** 该寄存器用于配置在三个时间分片（Timeslice）持续时间内，三个环（Ring）的优先级级别。应以广播方式写入，并分别存储在每个SE（Shader Engine）中。
+
+以下是字段的定义：
+
+| 字段名称          | 位范围   | 默认值 | 描述                                   |
+|------------------|----------|--------|----------------------------------------|
+| RING_ORDER_TS0   | 2:0      | 0x0    | 在 Timeslice 0 期间的环优先级顺序设置。 |
+| RING_ORDER_TS1   | 5:3      | 0x0    | 在 Timeslice 1 期间的环优先级顺序设置。 |
+| RING_ORDER_TS2   | 8:6      | 0x0    | 在 Timeslice 2 期间的环优先级顺序设置。 |
+
+这些字段允许配置每个时间分片内三个环的优先级顺序。优先级的不同顺序可能会影响GPU操作的性能和效率，具体取决于应用程序的要求和硬件配置。
+
+
+### SPI:SPI_BARYC_CNTL · [R/W] · 32 bits · Access: 32 · GpuF0MMReg:0x286e0
+
+**DESCRIPTION:** 此寄存器用于配置BCI（Barycentric Interpolation）中的重心插值控制。BCI是一种用于图形渲染中的插值技术，用于计算像素内的属性值。以下是字段的定义和说明：
+
+| 字段名称                | 位范围     | 默认值 | 描述                                                 |
+|------------------------|------------|--------|------------------------------------------------------|
+| PERSP_CENTER_CNTL       | 0          | 0x0    | 透视中心控制。可能的值：                           |
+|                        |            |        | 00 - 在中心处启用                                    |
+|                        |            |        | 01 - 在质心处启用                                    |
+| PERSP_CENTROID_CNTL     | 4          | 0x0    | 透视质心控制。可能的值：                           |
+|                        |            |        | 00 - 在质心处启用                                    |
+|                        |            |        | 01 - 在中心处启用                                    |
+| LINEAR_CENTER_CNTL      | 8          | 0x0    | 线性中心控制。可能的值：                            |
+|                        |            |        | 00 - 在中心处启用                                    |
+|                        |            |        | 01 - 在质心处启用                                    |
+| LINEAR_CENTROID_CNTL    | 12         | 0x0    | 线性质心控制。可能的值：                            |
+|                        |            |        | 00 - 在质心处启用                                    |
+|                        |            |        | 01 - 在中心处启用                                    |
+| POS_FLOAT_LOCATION      | 17:16      | 0x0    | 位置浮点数位置控制。可能的值：                      |
+|                        |            |        | 00 - 在像素中心计算每像素浮点位置                   |
+|                        |            |        | 01 - 在像素质心计算每像素浮点位置                   |
+|                        |            |        | 02 - 在迭代样本编号处计算每像素浮点位置               |
+|                        |            |        | 03 - 未定义                                          |
+| POS_FLOAT_ULC           | 20         | 0x0    | 强制浮点位置到像素的左上角（X.0，Y.0）。              |
+| FRONT_FACE_ALL_BITS     | 24         | 0x0    | 前向面所有位控制。可能的值：                        |
+|                        |            |        | 00 - 符号位表示isFF（dx9，-1.0f == 背面，+1.0f == 正面） |
+|                        |            |        | 01 - 用isFF替换整个32位值（WGF，1 == 正面，0 == 背面）  |
+
+这些字段允许配置BCI中的不同插值参数，以满足图形渲染的需求。根据这些参数的设置，插值的方式和位置可能会发生变化，从而影响像素的属性计算。
+
+### SPI:SPI_CONFIG_CNTL_1 · [R/W] · 32 bits · Access: 32 · GpuF0MMReg:0x913c
+
+### SPI:SPI_DYN_GPR_LOCK_EN · [R/W] · 32 bits · Access: 32 · GpuF0MMReg:0x90dc
+### SPI:SPI_INTERP_CONTROL_0 · [R/W] · 32 bits · Access: 32 · GpuF0MMReg:0x286d4
+### SPI:SPI_PS_INPUT_ADDR · [R/W] · 32 bits · Access: 32 · GpuF0MMReg:0x286d0
+### SPI:SPI_PS_INPUT_CNTL_[0-31] · [R/W] · 32 bits · Access: 32 · GpuF0MMReg:0x28644-0x286c0
+### SPI:SPI_PS_INPUT_ENA · [R/W] · 32 bits · Access: 32 · GpuF0MMReg:0x286cc
+### SPI:SPI_PS_IN_CONTROL · [R/W] · 32 bits · Access: 32 · GpuF0MMReg:0x286d8
+### SPI:SPI_PS_MAX_WAVE_ID · [R/W] · 16 bits · Access: 16 · GpuF0MMReg:0x90ec
+### SPI:SPI_RESOURCE_RESERVE_CU_AB_[0-7] · [R/W] · 32 bits · Access: 32 · GpuF0MMReg:0x936c0x9388
+### SPI:SPI_SHADER_COL_FORMAT · [R/W] · 32 bits · Access: 32 · GpuF0MMReg:0x28714
+### SPI:SPI_SHADER_POS_FORMAT · [R/W] · 32 bits · Access: 32 · GpuF0MMReg:0x2870c
+### SPI:SPI_SHADER_Z_FORMAT · [R/W] · 32 bits · Access: 32 · GpuF0MMReg:0x28710
+### SPI:SPI_STATIC_THREAD_MGMT_1 · [R/W] · 32 bits · Access: 32 · GpuF0MMReg:0x90e0
+### SPI:SPI_STATIC_THREAD_MGMT_2 · [R/W] · 32 bits · Access: 32 · GpuF0MMReg:0x90e4
+### SPI:SPI_STATIC_THREAD_MGMT_3 · [R/W] · 16 bits · Access: 16 · GpuF0MMReg:0x90e8
+### SPI:SPI_TMPRING_SIZE · [R/W] · 32 bits · Access: 32 · GpuF0MMReg:0x286e8
+## SPI:SPI_VS_OUT_CONFIG · [R/W] · 32 bits · Access: 32 · GpuF0MMReg:0x286c4
+### SPI:SPI_WAVE_MGMT_1 · [R/W] · 32 bits · Access: 32 · GpuF0MMReg:0x28704
+## SPI:SPI_WAVE_MGMT_2 · [R/W] · 16 bits · Access: 16 · GpuF0MMReg:0x28708
+
+
+# 10. Compute Registers
+
+
+### COMP:COMPUTE_DIM_X · [W] · 32 bits · Access: 32 · GpuF0MMReg:0xb804 
+
+
+### COMP:COMPUTE_DIM_Y · [W] · 32 bits · Access: 32 · GpuF0MMReg:0xb808
+
+
+### COMP:COMPUTE_DIM_Z · [W] · 32 bits · Access: 32 · GpuF0MMReg:0xb80c  
+
+
+### COMP:COMPUTE_DISPATCH_INITIATOR · [W] · 32 bits · Access: 32 · GpuF0MMReg:0xb800 
+
+### COMP:COMPUTE_MAX_WAVE_ID · [W] · 32 bits · Access: 32 · GpuF0MMReg:0xb82c 
+
+### COMP:COMPUTE_NUM_THREAD_X · [W] · 32 bits · Access: 32 · GpuF0MMReg:0xb81c  
+
+### COMP:COMPUTE_NUM_THREAD_Y · [W] · 32 bits · Access: 32 · GpuF0MMReg:0xb820 
+
+### COMP:COMPUTE_NUM_THREAD_Z · [W] · 32 bits · Access: 32 · GpuF0MMReg:0xb824 
+
+
+### COMP:COMPUTE_PGM_HI · [W] · 32 bits · Access: 32 · GpuF0MMReg:0xb834 
+
+
+### COMP:COMPUTE_PGM_LO · [W] · 32 bits · Access: 32 · GpuF0MMReg:0xb830 
+
+
+### COMP:COMPUTE_PGM_RSRC1 · [W] · 32 bits · Access: 32 · GpuF0MMReg:0xb848 
+
+
+### COMP:COMPUTE_PGM_RSRC2 · [W] · 32 bits · Access: 32 · GpuF0MMReg:0xb84c 
+
+
+### COMP:COMPUTE_RESOURCE_LIMITS · [W] · 32 bits · Access: 32 · GpuF0MMReg:0xb854  
+
+### COMP:COMPUTE_START_X · [W] · 32 bits · Access: 32 · GpuF0MMReg:0xb810 
+
+### COMP:COMPUTE_START_Y · [W] · 32 bits · Access: 32 · GpuF0MMReg:0xb814
+
+### COMP:COMPUTE_START_Z · [W] · 32 bits · Access: 32 · GpuF0MMReg:0xb818 
+
+### COMP:COMPUTE_STATIC_THREAD_MGMT_SE0 · [W] · 32 bits · Access: 32 · GpuF0MMReg:0xb858
+
+### COMP:COMPUTE_STATIC_THREAD_MGMT_SE1 · [W] · 32 bits · Access: 32 · GpuF0MMReg:0xb85c
+
+
+### COMP:COMPUTE_TBA_HI · [W] · 32 bits · Access: 32 · GpuF0MMReg:0xb83c 
+
+
+### COMP:COMPUTE_TMA_HI · [W] · 32 bits · Access: 32 · GpuF0MMReg:0xb844 
+
+### COMP:COMPUTE_TMA_LO · [W] · 32 bits · Access: 32 · GpuF0MMReg:0xb840 
+
+
+### COMP:COMPUTE_TMPRING_SIZE · [W] · 32 bits · Access: 32 · GpuF0MMReg:0xb860 
+
+
+### COMP:COMPUTE_USER_DATA_[0-15] · [W] · 32 bits · Access: 32 · GpuF0MMReg:0xb900-0xb93c 
+
+
+
+# 11. Tiling Registers
+
+### GB_TILE_MODE[0-31]
+
+### 
+
+# 12. Surface Synchronization Registers
+
+### CP_COHER_BASE
+
+### CP_COHER_CNTL
+
+
+### CP_COHER_SIZE
+
+
+
+# 13. Texture Pipe Registers
+
+
+### TA_BC_BASE_ADDR
+
+### TA_CS_BC_BASE_ADDR
+
+
+
+# 14. Depth Buffer Registers
+###  DB_ALPHA_TO_MASK
+
+DB:DB_ALPHA_TO_MASK 寄存器是一个32位寄存器，用于控制与 alpha 值相关的蒙版操作。该寄存器的 GPU 寄存器地址为 0x28b70。
+
+**字段解析**
+
+| Field Name            | 位范围       | 默认值 | 描述                                                                                   |
+|-----------------------|--------------|--------|------------------------------------------------------------------------------------------|
+| ALPHA_TO_MASK_ENABLE  | 0            | none   | 如果启用，样本蒙版将与从 alpha 值产生的蒙版进行逻辑与操作。可以通过设置 DB_SHADER_CONTROL.ALPHA_TO_MASK_DISABLE 来覆盖此字段。 |
+| ALPHA_TO_MASK_OFFSET0 | 9:8          | none   | 如果启用 alpha 到蒙版，这是每个四方块中像素 (0,0) 的抖动阈值。设置为 2 表示非抖动，或者设置为 0-3 中的唯一值表示抖动。        |
+| ALPHA_TO_MASK_OFFSET1 | 11:10        | none   | 如果启用 alpha 到蒙版，这是每个四方块中像素 (0,1) 的抖动阈值。设置为 2 表示非抖动，或者设置为 0-3 中的唯一值表示抖动。      |
+| ALPHA_TO_MASK_OFFSET2 | 13:12        | none   | 如果启用 alpha 到蒙版，这是每个四方块中像素 (1,0) 的抖动阈值。设置为 2 表示非抖动，或者设置为 0-3 中的唯一值表示抖动。      |
+| ALPHA_TO_MASK_OFFSET3 | 15:14        | none   | 如果启用 alpha 到蒙版，这是每个四方块中像素 (1,1) 的抖动阈值。设置为 2 表示非抖动，或者设置为 0-3 中的唯一值表示抖动。      |
+| OFFSET_ROUND          | 16           | none   | 抖动阈值舍入。设置为 0 表示无抖动外观，设置为 1 表示有抖动外观。                              |
+
+这个寄存器用于配置与 alpha 值相关的蒙版操作，以影响像素的采样过程。
+
+
+### DB_COUNT_CONTROL
+
+DB:DB_COUNT_CONTROL 寄存器是一个32位寄存器，用于配置深度缓冲区计数相关的控制参数。该寄存器的 GPU 寄存器地址为 0x28004。
+
+**字段解析**
+
+| Field Name            | 位范围       | 默认值 | 描述                                                                                                     |
+|-----------------------|--------------|--------|------------------------------------------------------------------------------------------------------------|
+| ZPASS_INCREMENT_DISABLE| 0            | none   | 禁止增加此上下文的 ZPass 计数。                                                                           |
+| PERFECT_ZPASS_COUNTS  | 1            | none   | 强制 ZPass 计数准确，通过关闭跳过光栅化可能导致不正确的 ZPass 计数的无操作剔除优化（部分覆盖的瓦片）。 |
+| SAMPLE_RATE           | 6:4          | 0x0    | 设置每像素计数的样本数。无论实际每像素有多少样本，面积计数都是准确的。                                     |
+
+DB:DB_COUNT_CONTROL 寄存器用于控制深度缓冲区计数的行为，包括是否启用增加 ZPass 计数、是否强制准确的 ZPass 计数，以及每像素计数的样本数。这些配置可用于优化图形渲染流程。
+
+
+
+### DB_DEPTH_BOUNDS_MAX
+
+DB:DB_DEPTH_BOUNDS_MAX 寄存器是一个32位寄存器，用于配置深度范围测试的最大深度值。该寄存器的 GPU 寄存器地址为 0x28024。
+
+**字段解析**
+
+| Field Name    | 位范围 | 默认值 | 描述                                      |
+|---------------|--------|--------|-------------------------------------------|
+| MAX           | 31:0   | none   | 深度范围测试的最大深度值。               |
+
+DB:DB_DEPTH_BOUNDS_MAX 寄存器用于设置深度范围测试的最大深度值。深度范围测试是一种用于确定像素是否在深度范围内的测试，该测试可以用于剔除不需要的像素，以提高图形渲染的性能。这个寄存器的 MAX 字段指定了允许通过深度范围测试的最大深度值。
+
+
+### DB_DEPTH_BOUNDS_MIN
+
+DB:DB_DEPTH_BOUNDS_MIN 寄存器是一个32位寄存器，用于配置深度范围测试的最小深度值。该寄存器的 GPU 寄存器地址为 0x28020。
+
+**字段解析**
+
+| Field Name    | 位范围 | 默认值 | 描述                                      |
+|---------------|--------|--------|-------------------------------------------|
+| MIN           | 31:0   | none   | 深度范围测试的最小深度值。               |
+
+DB:DB_DEPTH_BOUNDS_MIN 寄存器用于设置深度范围测试的最小深度值。深度范围测试是一种用于确定像素是否在深度范围内的测试，该测试可以用于剔除不需要的像素，以提高图形渲染的性能。这个寄存器的 MIN 字段指定了允许通过深度范围测试的最小深度值。
+
+
+
+### DB_DEPTH_CLEAR
+
+DB:DB_DEPTH_CLEAR 寄存器是一个32位寄存器，用于配置当 ZMASK 等于0时表示瓦片已经被清除为背景深度的深度值。该寄存器的 GPU 寄存器地址为 0x2802c。
+
+**字段解析**
+
+| Field Name    | 位范围 | 默认值 | 描述                                      |
+|---------------|--------|--------|-------------------------------------------|
+| DEPTH_CLEAR   | 31:0   | none   | 当 ZMASK==0 时表示瓦片已经被清除为背景深度的深度值。这个寄存器保存一个32位浮点值。这个值必须在0.0到1.0的范围内。               |
+
+DB:DB_DEPTH_CLEAR 寄存器用于配置深度缓冲区中的清除深度值。当 ZMASK 等于0时，表示瓦片已经被清除到背景深度值。这个寄存器的 DEPTH_CLEAR 字段指定了清除深度值，它必须是一个32位浮点值，并且必须在0.0到1.0的范围内。这个值通常用于初始化或重置深度缓冲区。
+
+###  DB_DEPTH_CONTROL
+
+DB:DB_DEPTH_CONTROL 寄存器是一个32位寄存器，用于控制深度和模板测试的行为。该寄存器的 GPU 寄存器地址为 0x28800。
+
+**字段解析**
+
+| Field Name                      | 位范围 | 默认值 | 描述                                                                                     |
+|---------------------------------|--------|--------|--------------------------------------------------------------------------------------------|
+| STENCIL_ENABLE                  | 0      | none   | 启用模板测试。如果禁用，所有像素都会通过模板测试。如果没有模板缓冲区，将视为禁用。           |
+| Z_ENABLE                        | 1      | none   | 启用深度测试。如果禁用，所有像素都会通过深度测试。如果没有深度缓冲区，将视为禁用。         |
+| Z_WRITE_ENABLE                  | 2      | none   | 如果深度测试通过，启用对深度缓冲区的写入。                                            |
+| DEPTH_BOUNDS_ENABLE             | 3      | none   | 启用深度范围测试。如果禁用，所有样本都会通过深度范围测试。如果没有深度缓冲区，将视为禁用。 |
+| ZFUNC                           | 6:4    | none   | 指定在片段中每个样本与相应样本点的目标深度进行比较的函数。                                    |
+| BACKFACE_ENABLE                 | 7      | none   | 如果为 false，强制将所有四方块视为正面四方块进行模板测试。                                |
+| STENCILFUNC                     | 10:8   | none   | 指定与正面四方块的目标模板值进行比较的函数。模板测试通过如果 ref OP dest 为 true。               |
+| STENCILFUNC_BF                  | 22:20  | none   | 指定与背面四方块的目标模板值进行比较的函数。模板测试通过如果 ref OP dest 为 true。             |
+| ENABLE_COLOR_WRITES_ON_DEPTH_FAIL | 30    | none   | 如果 z 或模板测试失败，则启用对颜色缓冲区的写入。                                          |
+| DISABLE_COLOR_WRITES_ON_DEPTH_PASS | 31    | none   | 如果 z 和模板测试通过，则禁用对颜色缓冲区的写入。                                        |
+
+DB:DB_DEPTH_CONTROL 寄存器用于配置深度和模板测试的各种行为，包括启用/禁用测试、深度写入、颜色写入等操作，以控制图形渲染流程中的深度和模板处理。这些配置可用于调整渲染管线以实现不同的图形效果。
+
+### DB_DEPTH_INFO
+
+DB:DB_DEPTH_INFO 寄存器是一个32位寄存器，用于配置深度缓冲区信息，特别是与数据存储有关的配置。该寄存器的 GPU 寄存器地址为 0x2803c。
+
+**字段解析**
+
+| Field Name          | 位范围 | 默认值 | 描述                                                                                                         |
+|---------------------|--------|--------|------------------------------------------------------------------------------------------------------------|
+| ADDR5_SWIZZLE_MASK  | 3:0    | none   | 对于32B瓦片，指示数据应存储在64B字的上半部分还是下半部分。如果ADDR5_SWIZZLE_MASK与{TILE_Y[1:0], TILE_X[1:0]}的异或减少设置，使用上半部分，否则使用下半部分。最可能的最佳值是0x1。|
+
+DB:DB_DEPTH_INFO 寄存器用于配置深度缓冲区数据的存储方式。特别地，ADDR5_SWIZZLE_MASK 字段用于指示在32B瓦片中数据应存储在64B字的哪一半，根据一些特定条件进行选择。这个寄存器的配置可以影响深度缓冲区数据的组织和存储方式。
+
+### DB_DEPTH_SIZE
+
+DB:DB_DEPTH_SIZE 寄存器是一个32位寄存器，用于配置深度缓冲区的大小。该寄存器的 GPU 寄存器地址为 0x28058。
+
+**字段解析**
+
+| Field Name       | 位范围   | 默认值 | 描述                                                         |
+|------------------|----------|--------|------------------------------------------------------------|
+| PITCH_TILE_MAX   | 10:0     | none   | 以8x8像素瓦片为单位的宽度。实际宽度为 (Pitch/8 - 1)。 |
+| HEIGHT_TILE_MAX  | 21:11    | none   | 以8x8像素瓦片为单位的深度缓冲区高度。实际高度为 (height/8 - 1)。 |
+
+DB:DB_DEPTH_SIZE 寄存器用于配置深度缓冲区的大小，特别是指定深度缓冲区的宽度和高度。PITCH_TILE_MAX 字段表示深度缓冲区的宽度（以8x8像素瓦片为单位），而 HEIGHT_TILE_MAX 字段表示深度缓冲区的高度（同样以8x8像素瓦片为单位）。这些字段的配置决定了深度缓冲区的存储尺寸。
+
+
+### DB_DEPTH_SLICE
+
+DB:DB_DEPTH_SLICE 寄存器是一个32位寄存器，用于配置深度缓冲区切片的信息。该寄存器的 GPU 寄存器地址为 0x2805c。
+
+**字段解析**
+
+| Field Name      | 位范围 | 默认值 | 描述                                                                                                              |
+|-----------------|--------|--------|-----------------------------------------------------------------------------------------------------------------|
+| SLICE_TILE_MAX  | 21:0   | none   | 到下一个切片的8x8像素瓦片数加上一些小数以能够旋转瓦片模式。 (pitch*height/64 - 1)。|
+
+DB:DB_DEPTH_SLICE 寄存器用于配置深度缓冲区切片的信息，特别是指定了在下一个切片之前有多少个8x8像素瓦片。这个值被计算为 (pitch*height/64 - 1) 加上一些小数，以便能够旋转瓦片模式。深度缓冲区切片的配置通常与深度缓冲区的大小和布局有关，影响图形渲染中深度信息的存储方式。
+
+### DB_DEPTH_VIEW
+
+DB:DB_DEPTH_VIEW 寄存器是一个32位寄存器，用于选择渲染目标0的切片索引范围。该寄存器的 GPU 寄存器地址为 0x28008。
+
+**字段解析**
+
+| Field Name        | 位范围 | 默认值 | 描述                                                                                         |
+|-------------------|--------|--------|--------------------------------------------------------------------------------------------|
+| SLICE_START       | 10:0   | none   | 指定此视图的起始切片编号。此字段将添加到 RenderTargetArrayIndex 以计算要渲染的切片。SLICE_START 必须小于或等于 SLICE_MAX。 |
+| SLICE_MAX         | 23:13  | none   | 指定此资源的最大允许的 Z 切片索引，即总切片数减一。                                     |
+| Z_READ_ONLY       | 24     | none   | 只读 Z 缓冲区，即禁止写入 Z 缓冲区。                                                  |
+| STENCIL_READ_ONLY | 25     | none   | 只读模板缓冲区，即禁止写入模板缓冲区。                                              |
+
+DB:DB_DEPTH_VIEW 寄存器用于选择渲染目标0的切片索引范围，并可以配置是否只读的 Z 缓冲区和模板缓冲区。SLICE_START 和 SLICE_MAX 字段用于指定切片范围，Z_READ_ONLY 和 STENCIL_READ_ONLY 字段用于配置只读属性。这些配置影响深度和模板测试的行为。
+
+
+### DB_EQAA
+
+DB:DB_EQAA 寄存器是一个32位寄存器，用于控制深度缓冲区的等效抗锯齿 (EQAA) 相关设置。EQAA 是一种用于提高图形渲染质量的技术，通过对多个样本进行采样和插值来实现更平滑的图像效果。该寄存器的 GPU 寄存器地址为 0x28804。
+
+**字段解析**
+
+| Field Name                  | 位范围  | 默认值 | 描述                                                                                                                                                                                                                                    |
+|-----------------------------|---------|--------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| MAX_ANCHOR_SAMPLES           | 2:0     | none   | 设置CB允许使用的锚定样本数的最大值。将其设置为DB表面分配的最小样本数以限制CB在创建非锚定片段后可能需要丢弃它们。                                                                                                                         |
+| PS_ITER_SAMPLES             | 6:4     | none   | 指定PS_ITER_SAMPLE设置时要迭代的样本数量，从而设置超采样量。通常这是应用程序公开的样本数量。不支持大于深度表面样本数的值。                                                                                                                  |
+| MASK_EXPORT_NUM_SAMPLES     | 10:8    | none   | 指定用于着色器掩码导出的样本数量。                                                                                                                                                                                                    |
+| ALPHA_TO_MASK_NUM_SAMPLES   | 14:12   | none   | 为A2M生成的质量样本数。将其设置在应用程序公开的样本数和较高EQAA样本数之间以进行速度/质量权衡。如果ALPHA_TO_MASK_EQAA_DISABLE=1，则必须将其设置为应用程序公开的样本数。                                              |
+| HIGH_QUALITY_INTERSECTIONS   | 16      | none   | 如果未设置，所有完全覆盖的瓦片将以瓦片速率通过详细步进器运行，仅在深度测试结果未知时才以DB的表面速率减慢，或者在着色器执行时以像素速率减慢。如果设置，只会加速已知Z测试结果的完全覆盖瓦片，但仍允许可能存在Z交点的瓦片以详细速率运行，从而获得抗锯齿的交点。最好与INTERPOLATE_COMP_Z一起使用以获得最佳质量。  |
+| INCOHERENT_EQAA_READS        | 17      | none   | 禁用对共享锚定样本但不共享详细样本的相邻三角形的一致性检查，对于不存在数据转发的相邻条带来说很重要。可能会引入依赖于延迟的结果，因此除了单元测试外，应强制为0。                                                       |
+| INTERPOLATE_COMP_Z           | 18      | none   | 允许未锚定的样本从压缩的Z平面插值出唯一的Z值。在像素的第一个交点上创建漂亮的抗锯齿交点。引入依赖于延迟的结果，因此除了单元定向测试可能需要可视检查外，应将其强制为0。                                                         |
+| INTERPOLATE_SRC_Z            | 19      | none   | 强制未锚定样本在目标Z未压缩时插值出唯一的源Z，以获得更平滑的交点，即使在未压缩的Z上也会引发ZFUNC==EQUALS的混合失败。除非进行实验，否则可能永远不会设置。                                                                                                 |
+| STATIC_ANCHOR_ASSOCIATIONS   | 20      | none   | 强制复制的目标数据始终来自静态关联的锚定样本，而不是尝试从最靠近的锚定样本拉取目标数据，该样本位于原始图元内。当设置时，可能会导致额外的一致性停顿并且可能会降低相邻三角形的质量。                       |
+| ALPHA_TO_MASK_EQAA_DISABLE   | 21      | none   | 使Alpha to Mask设置的样本与先前的GPU完全相同。只有在需要先前一代的行为时才应设置，否则新行为针对EQAA进行了优化，可以在混合AA模式和即使在没有AA时也可以提高质量。                                      |
+| OVERRASTERIZATION_AMOUNT     | 26:24   | none   | 超采样中的样本掩码的OR减少次数的对数。                                                                                                                                                                                               |
+| ENABLE_POSTZ_OVERRASTERIZATION | 27      | none   | 启用PostZ中的超采样（即，在着色器之后）。                                                                                                                                                                                        |
+
+DB:DB_EQAA 寄存器用于控制深度缓冲区的等效抗锯齿 (EQAA) 相关设置。EQAA 技术可以提高图形渲染的质量，通过对多个样本进行采样和插值来实现更平滑的图像效果。这些字段允许配置 EQAA 的不同方面，以满足特定的渲染需求和质量要求。
+
+###
+
+以下是关于这两个寄存器的描述和字段解析：
+
+**DB:DB_HTILE_DATA_BASE 寄存器**
+
+- 寄存器描述: 用于指定 HTileData 表面的基地址。
+- 寄存器地址: 0x28014
+- 字段解析：
+
+  | Field Name | 位范围  | 默认值 | 描述                                                                                              |
+  |------------|---------|--------|-------------------------------------------------------------------------------------------------|
+  | BASE_256B  | 31:0    | none   | HTileData 表面在设备地址空间中第一个字节的位置，必须按256字节对齐。40位地址的高32位。该表面包含 HiZ 数据。 |
+
+**DB:DB_HTILE_SURFACE 寄存器**
+
+- 寄存器描述: 用于配置 HTile 表面的属性。
+- 寄存器地址: 0x28abc
+- 字段解析：
+
+  | Field Name           | 位范围  | 默认值 | 描述                                                                                                            |
+  |----------------------|---------|--------|-------------------------------------------------------------------------------------------------------------------|
+  | LINEAR               | 0       | none   | 表面以每次8个 htiles 高的方式线性存储，直到表面完成。                                                              |
+  | FULL_CACHE           | 1       | none   | 此 htile 缓冲区使用整个 htile 缓存。如果设置为0且 htile 表面不适合缓存的一半，那么 SC 的部分向量死锁计时器也必须启用。 |
+  | HTILE_USES_PRELOAD_WIN | 2       | none   | 如果设置，htile 表面的尺寸将与预加载窗口的尺寸相同；否则，将与深度缓冲区的尺寸相同。                         |
+  | PRELOAD              | 3       | none   | 一旦在上下文中看到 VGT_DRAW_INITIATOR，只要有空间可用，就预加载所有适合的数据。                             |
+  | PREFETCH_WIDTH       | 9:4     | none   | 预取窗口的宽度（以64像素增量为单位）。预取器尝试始终在缓存中保持此窗口周围最后一个光栅化的 htile。              |
+  | PREFETCH_HEIGHT      | 15:10   | none   | 预取窗口的高度（以64像素增量为单位）。预取器尝试始终在缓存中保持此窗口周围最后一个光栅化的 htile。             |
+  | DST_OUTSIDE_ZERO_TO_ONE | 16  | none   | 告诉 HiZ 逻辑不要假设深度范围的最小值是精确的0.0或深度范围的最大值是精确的1.0。                            |
+
+这两个寄存器用于配置与深度缓冲区 HiZ 数据相关的设置。DB:DB_HTILE_DATA_BASE 寄存器指定了 HiZ 数据的基地址，而 DB:DB_HTILE_SURFACE 寄存器用于配置 HiZ 数据表面的属性，包括如何存储、预取和其他行为。这些配置可以影响深度测试和图形渲染的性能和质量。
+
+
+### DB_PRELOAD_CONTROL
+
+DB:DB_PRELOAD_CONTROL 寄存器是一个可读写的 32 位寄存器，用于配置预加载窗口的位置和大小，以 64 像素为增量。该寄存器的地址是 0x28ac8。
+
+以下是字段的定义：
+
+| 字段名称  | 位范围  | 默认值 | 描述                                      |
+|-------------|---------|--------|-----------------------------------------|
+| START_X    | 7:0     | none   | 预加载窗口的起始 X 位置，以 64 像素为增量。   |
+| START_Y    | 15:8    | none   | 预加载窗口的起始 Y 位置，以 64 像素为增量。   |
+| MAX_X      | 23:16   | none   | 预加载窗口的结束 X 位置，以 64 像素为增量。   |
+| MAX_Y      | 31:24   | none   | 预加载窗口的结束 Y 位置，以 64 像素为增量。   |
+
+DB:DB_PRELOAD_CONTROL 寄存器用于配置在图形渲染过程中哪些像素数据需要被预先加载。可以通过设置这些字段的值来控制预加载窗口的范围，以满足特定的渲染需求。
+
+
+### DB_RENDER_CONTROL
+
+DB:DB_RENDER_CONTROL 寄存器是一个可读写的 32 位寄存器，用于控制深度和模板测试等渲染操作。该寄存器的地址是 0x28000。
+
+以下是字段的定义：
+
+| 字段名称              | 位范围 | 默认值 | 描述                                                                                           |
+|----------------------|--------|--------|--------------------------------------------------------------------------------------------------|
+| DEPTH_CLEAR_ENABLE    | 0      | none   | 启用深度缓冲区的清除操作，将深度值清除为指定的 Clear Value。                                       |
+| STENCIL_CLEAR_ENABLE  | 1      | none   | 启用模板缓冲区的清除操作，将模板值清除为指定的 Clear Value。                                      |
+| DEPTH_COPY            | 2      | none   | 启用深度值的扩展，将其复制到颜色渲染目标 0。必须在颜色缓冲区（CB）中设置所需的目标格式。             |
+| STENCIL_COPY          | 3      | none   | 启用模板值的扩展，将其复制到颜色渲染目标 0。必须在颜色缓冲区（CB）中设置所需的目标格式。          |
+| RESUMMARIZE_ENABLE    | 4      | none   | 如果设置，所有受影响的瓦片将更新 HTILE 表面信息。                                                 |
+| STENCIL_COMPRESS_DISABLE | 5   | none   | 强制在任何渲染的瓦片上禁用层次剔除的模板值解压缩。                                          |
+| DEPTH_COMPRESS_DISABLE   | 6   | none   | 强制在任何渲染的瓦片上禁用层次剔除的深度值解压缩。                                          |
+| COPY_CENTROID          | 7      | none   | 如果设置，从像素内的第一个亮点样本开始复制，从 COPY_SAMPLE 开始（循环回到较低的样本）。如果 COPY_CENTROID==0 并且启用了深度或模板写入（在生产驱动程序中不会发生），则必须设置 DB_RENDER_OVERRIDE.FORCE_QC_SMASK_CONFLICT。此外，在执行深度或模板复制并且启用 ps_iter 时，必须将 COPY_CENTROID 设置为 1。 |
+| COPY_SAMPLE            | 11:8   | none   | 如果 COPY_CENTROID 为真，则从此样本编号开始复制第一个亮点样本。否则，不管是否亮点样本都复制此样本。       |
+
+DB:DB_RENDER_CONTROL 寄存器用于配置深度和模板测试等渲染操作的行为。可以通过设置这些字段的值来控制渲染过程中的不同操作。
+
+
+### DB_RENDER_OVERRIDE
+
+DB:DB_RENDER_OVERRIDE 寄存器是一个可读写的 32 位寄存器，用于控制深度和模板测试等渲染操作的高级设置。该寄存器的地址是 0x2800c。
+
+以下是字段的定义：
+
+| 字段名称                | 位范围  | 默认值 | 描述                                                                                      |
+|------------------------|---------|--------|---------------------------------------------------------------------------------------------|
+| FORCE_HIZ_ENABLE       | 1:0     | none   | 强制启用或禁用层次深度剔除，忽略 DB_SHADER_CONTROL 和其他所有渲染状态。                      |
+| FORCE_HIS_ENABLE0      | 3:2     | none   | 强制启用或禁用用于比较状态 0 的层次模板剔除，忽略 DB_SHADER_CONTROL 和其他所有渲染状态。       |
+| FORCE_HIS_ENABLE1      | 5:4     | none   | 强制启用或禁用用于比较状态 1 的层次模板剔除，忽略 DB_SHADER_CONTROL 和其他所有渲染状态。       |
+| FORCE_SHADER_Z_ORDER  | 6       | none   | 强制使用 DB_SHADER_CONTROL.Z_ORDER 中指定的设置进行早期/晚期 Z 和 S 测试。                 |
+| FAST_Z_DISABLE         | 7       | none   | 禁用加速 Z 清除或写操作。防止在需要深度操作时在详细栅格化之前终止四分之一。                  |
+| FAST_STENCIL_DISABLE   | 8       | none   | 禁用加速模板清除或写操作。防止在需要模板操作时在详细栅格化之前终止四分之一。            |
+| NOOP_CULL_DISABLE      | 9       | none   | 防止层次剔除杀死那些通过 Z 和模板测试，但不写入 Z、模板或颜色的四分之一。              |
+| FORCE_COLOR_KILL       | 10      | none   | 强制 DB 假定着色器结果不需要，杀死所有样本在颜色操作之前。                                  |
+| FORCE_Z_READ           | 11      | none   | 即使不需要，也读取一个瓦片的所有 Z 数据。用于重新汇总 blt。                                   |
+| FORCE_STENCIL_READ     | 12      | none   | 即使不需要，也读取一个瓦片的所有模板数据。用于重新汇总 blt。                                   |
+| FORCE_FULL_Z_RANGE     | 14:13   | none   | 强制层次深度将每个基元视为其范围为 0.0 -> 1.0f 或不是。如果禁用，它会从 DB_SHADER_CONTROL.Z_EXPORT_ENABLE 和其他启用寄存器中隐式派生。可以用于重置 Z 范围为 0-1。 |
+| FORCE_QC_SMASK_CONFLICT | 15      | none   | 强制 Quad 一致性将具有匹配的 dtileid、x 和 y 作为冲突标记，并即使样本掩码不重叠也会停滞。       |
+| DISABLE_VIEWPORT_CLAMP | 16      | none   | 禁用视口夹取，允许 Z 数据保持不变。                                                        |
+| IGNORE_SC_ZRANGE       | 17      | none   | 在 HiZ 中忽略 SC 的 minZ/maxZ 的顶点边界对瓦片的影响。                                      |
+| DISABLE_FULLY_COVERED  | 18      | none   | 禁用进入 DB 的全覆盖瓦片位，关闭所有全覆盖的优化。                                          |
+| FORCE_Z_LIMIT_SUMM     | 20:19   | none   | 强制汇总 minz 或 maxz 或两者。                                                            |
+| MAX_TILES_IN_DTT       | 25:21   | 0x0    | 在引起停滞之前，在 dtt 块中允许的最大瓦片数。如果 DB_DEBUG.NEVER_FREE_Z_ONLY 设置为，MAX_TILES_IN_DTT 必须小于或等于以下值
+
+，具体取决于 Z 缓冲区中的样本数：1xaa: 21 2xaa: 11 4xaa: 5 8xaa: 2。生产驱动程序预计会将此寄存器保留为默认值 0，以满足约束。   |
+| DISABLE_TILE_RATE_TILES | 26      | 0x0    | 禁用允许某些全覆盖的 8x8 以瓦片速率运行的优化。                                          |
+| FORCE_Z_DIRTY          | 27      | none   | 即使没有更改，也强制写入 Z 数据。可以用于将 Z 数据复制到备用表面。                             |
+| FORCE_STENCIL_DIRTY    | 28      | none   | 即使没有更改，也强制写入模板数据。可以用于将模板数据复制到备用表面。                             |
+| FORCE_Z_VALID          | 29      | none   | 强制读取 Z 数据，除非它正在被覆盖。可以用于将 Z 数据复制到备用表面。                             |
+| FORCE_STENCIL_VALID    | 30      | none   | 强制读取模板数据，除非它正在被覆盖。可以用于将模板数据复制到备用表面。                             |
+| PRESERVE_COMPRESSION   | 31      | none   | 在解压缩到备用表面时可以使用，以防止 htile 的压缩状态不小心标记为扩展。停止写入 htile 缓冲区的 zmask 和 smem 字段的所有数据。 |
+
+DB:DB_RENDER_OVERRIDE 寄存器允许高级配置深度和模板测试等渲染操作的行为，以满足特定需求。通过设置这些字段的值，可以控制各种渲染优化和高级操作。
+
+
+### DB_RENDER_OVERRIDE2
+
+DB:DB_RENDER_OVERRIDE2 寄存器是一个可读写的 32 位寄存器，用于控制深度和模板测试等高级渲染设置。该寄存器的地址为 0x28010。
+
+以下是字段的定义：
+
+| 字段名称                           | 位范围  | 默认值 | 描述                                                                                           |
+|-----------------------------------|---------|--------|------------------------------------------------------------------------------------------------|
+| PARTIAL_SQUAD_LAUNCH_CONTROL       | 1:0     | none   | 设置如何启动部分分片。                                                                           |
+|                                   |         |        | 可能的值：                                                                                     |
+|                                   |         |        | 00 - PSLC_AUTO：让 DB 自动控制部分分片启动。                                                   |
+|                                   |         |        | 01 - PSLC_ON_HANG_ONLY：仅在检测到故障时启动部分分片。                                          |
+|                                   |         |        | 02 - PSLC_ASAP：启用部分启动的倒计时。PSLC_COUNTDOWN 值为 7 表示立即启动。                             |
+|                                   |         |        | 03 - PSLC_COUNTDOWN：启用部分启动的倒计时。PSLC_COUNTDOWN 值为 7 表示不启动部分分片。                         |
+| PARTIAL_SQUAD_LAUNCH_COUNTDOWN      | 4:2     | none   | 设置部分分片启动的倒计时，以 (1 << N) 表示。值为 7 表示禁用倒计时。                                     |
+| DISABLE_ZMASK_EXPCLEAR_OPTIMIZATION | 5       | none   | 仅在 DB_Z_INFO.ALLOW_EXPCLEAR=1 时有效。用于在未初始化表面上的第一次清除时，当无法信任 zmask 时使用。                |
+| DISABLE_SMEM_EXPCLEAR_OPTIMIZATION  | 6       | none   | 仅在 DB_STENCIL_INFO.ALLOW_EXPCLEAR=1 时有效。用于在未初始化表面上的第一次清除时，当无法信任模板内存格式时使用。     |
+| DISABLE_COLOR_ON_VALIDATION         | 7       | none   | 禁用 DB 查看 CB_COLOR_INFO、CB_SHADER_MASK 和 CB_TARGET_MASK 以确定颜色是否开启。                              |
+| DECOMPRESS_Z_ON_FLUSH              | 8       | none   | 0：在管道内通过分配缓存空间和在管道内解压来执行 Z 解压缩。在更高的 AA 模式下会增加缓存压力。                       |
+|                                   |         |        | 1：在刷新到内存时执行 Z 解压缩，不分配缓存空间，但会在每个瓦片的刷新中产生启动延迟。应设置为 0（1xAA 和 2xAA）或 1（4xAA 和 8xAA）。 |
+| DISABLE_REG_SNOOP                   | 9       | none   | 禁用 DB 对非 DB 寄存器的窥探。只应在非常特殊的情况下设置，并在开始绘制或复制上下文之前清除。                        |
+| DEPTH_BOUNDS_HIER_DEPTH_DISABLE     | 10      | none   | 禁用 hiZ 深度边界测试。hiZ 将无法确定深度边界测试是否通过或失败。                                           |
+
+DB:DB_RENDER_OVERRIDE2 寄存器允许高级配置深度和模板测试等渲染操作的行为，以满足特定需求。通过设置这些字段的值，可以控制各种渲染优化和高级操作。
+
+
+###  DB_SHADER_CONTROL
+
+DB:DB_SHADER_CONTROL 寄存器是一个可读写的 32 位寄存器，用于控制深度和模板测试以及着色器的行为。该寄存器的地址为 0x2880c。
+
+以下是字段的定义：
+
+| 字段名称                       | 位范围 | 默认值 | 描述                                                                                                   |
+|-------------------------------|--------|--------|--------------------------------------------------------------------------------------------------------|
+| Z_EXPORT_ENABLE               | 0      | none   | 使用 DB Shader Export 的红色通道作为 Z 值，而不是插值的 Z 值。                                      |
+|                               |        |        | SPI_SHADER_Z_FORMAT.Z_EXPORT_FORMAT 必须具有浮点32红色通道（32_ABGR，32_R，32_GR或32_AR）。                    |
+| STENCIL_TEST_VAL_EXPORT_ENABLE | 1      | none   | 使用 DB Shader Export 的绿色[7:0]作为模板测试值。Z_EXPORT_FORMAT 必须具有绿色通道（不为 ZERO，32_R 或 32_AR）。 |
+| STENCIL_OP_VAL_EXPORT_ENABLE   | 2      | none   | 使用 DB Shader Export 的绿色[15:8]作为模板操作值。Z_EXPORT_FORMAT 必须具有绿色通道（不为 ZERO，32_R 或 32_AR）。  |
+| Z_ORDER                       | 5:4    | none   | 指示着色器首选哪种类型的 Z 测试。如果无法使用 EARLY_Z，则 EARLY_Z_THEN_LATE_Z；如果无法使用 RE_Z，则 LATE_Z。     |
+|                               |        |        | 可能的值：                                                                                             |
+|                               |        |        | 00 - LATE_Z                                                                                            |
+|                               |        |        | 01 - EARLY_Z_THEN_LATE_Z                                                                               |
+|                               |        |        | 02 - RE_Z                                                                                              |
+|                               |        |        | 03 - EARLY_Z_THEN_RE_Z                                                                                |
+| KILL_ENABLE                   | 6      | none   | 着色器可以通过 texkill 杀死像素。                                                                    |
+| COVERAGE_TO_MASK_ENABLE       | 7      | none   | 使用 DB Shader Export 的 Alpha 通道作为独立的 Alpha to Mask 操作。                                      |
+|                               |        |        | Z_EXPORT_FORMAT 必须具有非整数 alpha 通道（32_AR、FP16_ABGR、UNORM16_ABGR、SNORM_ABGR 或 32_ABGR）。                |
+| MASK_EXPORT_ENABLE            | 8      | none   | 使用 DB Shader Export 的蓝色通道作为像素的采样掩码。使用最低 NUM_SAMPLES 位。                                 |
+|                               |        |        | Z_EXPORT_FORMAT 必须包含一个蓝色通道，始终被解释为采样掩码（*_ABGR）。                                       |
+| EXEC_ON_HIER_FAIL             | 9      | none   | 即使在分层 Z 或模板会杀死四分之一时，也会执行着色器。                                                 |
+|                               |        |        | 启用时，如果像素着色器具有对失败或通过样本（当 DEPTH_BEFORE_SHADER=0 时）的任何样本有所需的副作用（注意，EarlyZ 和 ReZ 杀死仍然会阻止着色器运行）。 |
+| EXEC_ON_NOOP                  | 10     | none   | 即使没有东西使用着色器的颜色或深度输出，也会执行着色器。                                               |
+|                               |        |        | 启用时，如果像素着色器具有仅针对通过像素产生的副作用而不是由上述标志引起的副作用，则应启用。                        |
+| ALPHA_TO_MASK_DISABLE         | 11     | none   | 如果设置，将禁用 alpha 到掩码，覆盖 DB_ALPHA_TO_MASK.ALPHA_TO_MASK_ENABLE。                              |
+| DEPTH_BEFORE_SHADER           | 12     | none   | 着色器被定义为在深度之后运行，这将阻止着色器杀死样本和/或像素（alpha 测试、alpha 到覆盖、覆盖到掩码、掩码导出、Z/模板导出）影响深度操作，
+
+因此不允许这些操作禁止 EarlyZ。此外，ZPass 计数被定义为在 Z 测试之后计数，因此此模式使得着色器和基于 alpha 的剔除不再减少 ZPass 计数。  |
+| CONSERVATIVE_Z_EXPORT         | 14:13  | none   | 强制 z 导出为小于或大于源 z 值。                                                                       |
+|                               |        |        | 可能的值：                                                                                             |
+|                               |        |        | 00 - EXPORT_ANY_Z：导出的 Z 可以是任何值                                                            |
+|                               |        |        | 01 - EXPORT_LESS_THAN_Z：导出的 Z 将被假定小于源 z 值                                                  |
+|                               |        |        | 02 - EXPORT_GREATER_THAN_Z：导出的 Z 将被假定大于源 z 值                                                |
+|                               |        |        | 03 - EXPORT_RESERVED：保留                                                                              |
+
+DB:DB_SHADER_CONTROL 寄存器允许控制深度和模板测试以及着色器行为的高级设置。这些字段的配置可以根据需求进行调整，以实现特定的渲染和深度测试效果。
+
+### DB_SRESULTS_COMPARE_STATE0
+
+DB:DB_SRESULTS_COMPARE_STATE0 寄存器是一个可读写的 32 位寄存器，用于配置与层次模板测试相关的比较状态。该寄存器的地址为 0x28ac0。
+
+以下是字段的定义：
+
+| 字段名称        | 位范围   | 默认值 | 描述                                                                                     |
+|----------------|----------|--------|------------------------------------------------------------------------------------------|
+| COMPAREFUNC0   | 2:0      | none   | 用于确定在层次模板测试期间 MayPass 和 MayFail smask 位的含义。NEVER 或 ALWAYS 会使 HTile 缓冲区中的 SResults 无效。可能的值： 00 - REF_NEVER: 永不通过 01 - REF_LESS: 如果 left < right 则通过 02 - REF_EQUAL: 如果 left = right 则通过 03 - REF_LEQUAL: 如果 left <= right 则通过 04 - REF_GREATER: 如果 left > right 则通过 05 - REF_NOTEQUAL: 如果 left != right 则通过 06 - REF_GEQUAL: 如果 left >= right 则通过 07 - REF_ALWAYS: 总是通过 |
+| COMPAREVALUE0  | 11:4     | none   | 在层次模板测试期间与模板参考值比较的模板值。                                          |
+| COMPAREMASK0   | 19:12    | none   | 该值与 SResults 比较值进行 AND 运算。如果掩码为 0，则使 HTile 缓冲区中的 SResults 无效。             |
+| ENABLE0        | 24       | none   | 如果设置，使用 HiS 测试中的 SResults。当比较状态已知时设置，当进行重新总结时清除。                      |
+
+DB:DB_SRESULTS_COMPARE_STATE0 寄存器允许配置用于层次模板测试的比较状态，以及在比较期间使用的模板值和掩码。这些设置可用于优化模板测试和深度测试的性能和准确性。
+
+### DB_SRESULTS_COMPARE_STATE1
+
+DB:DB_SRESULTS_COMPARE_STATE1 寄存器是一个可读写的 32 位寄存器，用于控制在分层模板测试期间用于比较的模板测试参数。该寄存器的地址为 0x28ac4。
+
+以下是字段的定义：
+
+| 字段名称         | 位范围   | 默认值 | 描述                                                                                   |
+|-----------------|----------|--------|----------------------------------------------------------------------------------------|
+| COMPAREFUNC1    | 2:0      | none   | 用于确定在分层模板测试期间用于比较的模板测试参数的含义。                             |
+|                 |          |        | NEVER 或 ALWAYS 会使 HTile 缓冲区中的 SResults 无效。                               |
+|                 |          |        | 可能的值：                                                                           |
+|                 |          |        | 00 - REF_NEVER: 从不通过                                                             |
+|                 |          |        | 01 - REF_LESS: 如果左侧 < 右侧通过                                                    |
+|                 |          |        | 02 - REF_EQUAL: 如果左侧 = 右侧通过                                                    |
+|                 |          |        | 03 - REF_LEQUAL: 如果左侧 <= 右侧通过                                                  |
+|                 |          |        | 04 - REF_GREATER: 如果左侧 > 右侧通过                                                  |
+|                 |          |        | 05 - REF_NOTEQUAL: 如果左侧 != 右侧通过                                                |
+|                 |          |        | 06 - REF_GEQUAL: 如果左侧 >= 右侧通过                                                  |
+|                 |          |        | 07 - REF_ALWAYS: 总是通过                                                           |
+| COMPAREVALUE1   | 11:4     | none   | 分层模板测试期间与模板参考值进行比较的模板值。                                      |
+| COMPAREMASK1    | 19:12    | none   | 此值与 SResults 比较值进行 AND 运算。如果掩码为 0，则使 HTile 缓冲区中的 SResults 无效。 |
+| ENABLE1         | 24       | none   | 如果设置，使用 HiS 测试中的 SResults。在已知比较状态时设置，进行重新汇总时清除。         |
+
+这些字段允许配置在模板测试期间如何处理模板比较，以及在分层模板测试期间如何使用 SResults。模板测试用于确定像素是否通过了模板测试，而 SResults 是一个包含关于测试的结果的缓冲区。
+
+
+
+### DB_STENCIL_CONTROL 
+
+DB:DB_STENCIL_CONTROL 寄存器是一个可读写的 32 位寄存器，用于控制模板测试的操作，包括前向面和后向面的情况。该寄存器的地址为 0x2842c。
+
+以下是字段的定义：
+
+| 字段名称          | 位范围    | 默认值 | 描述                                                                                             |
+|------------------|-----------|--------|--------------------------------------------------------------------------------------------------|
+| STENCILFAIL      | 3:0       | none   | 指定模板测试失败时用于前向面四边形的模板操作。                                                 |
+|                  |           |        | 可能的值：                                                                                     |
+|                  |           |        | 00 - STENCIL_KEEP: 新值 = 旧值                                                                 |
+|                  |           |        | 01 - STENCIL_ZERO: 新值 = 0                                                                   |
+|                  |           |        | 02 - STENCIL_ONES: 新值 = 8'hff                                                               |
+|                  |           |        | 03 - STENCIL_REPLACE_TEST: 新值 = STENCIL_TEST_VAL                                             |
+|                  |           |        | 04 - STENCIL_REPLACE_OP: 新值 = STENCIL_OP_VAL                                                 |
+|                  |           |        | 05 - STENCIL_ADD_CLAMP: 新值 = 旧值 + STENCIL_OP_VAL（夹紧）                                     |
+|                  |           |        | 06 - STENCIL_SUB_CLAMP: 新值 = 旧值 - STENCIL_OP_VAL（夹紧）                                     |
+|                  |           |        | 07 - STENCIL_INVERT: 新值 = 〜旧值                                                            |
+|                  |           |        | 08 - STENCIL_ADD_WRAP: 新值 = 旧值 + STENCIL_OP_VAL（环绕）                                     |
+|                  |           |        | 09 - STENCIL_SUB_WRAP: 新值 = 旧值 - STENCIL_OP_VAL（环绕）                                     |
+|                  |           |        | 10 - STENCIL_AND: 新值 = 旧值 & STENCIL_OP_VAL                                                |
+|                  |           |        | 11 - STENCIL_OR: 新值 = 旧值 | STENCIL_OP_VAL                                                 |
+|                  |           |        | 12 - STENCIL_XOR: 新值 = 旧值 ^ STENCIL_OP_VAL                                                 |
+|                  |           |        | 13 - STENCIL_NAND: 新值 = 〜（旧值 & STENCIL_OP_VAL）                                           |
+|                  |           |        | 14 - STENCIL_NOR: 新值 = 〜（旧值 | STENCIL_OP_VAL）                                           |
+|                  |           |        | 15 - STENCIL_XNOR: 新值 = 〜（旧值 ^ STENCIL_OP_VAL）                                          |
+| STENCILZPASS     | 7:4       | none   | 指定模板和深度函数都通过时用于前向面四边形的模板操作。                                         |
+|                  |           |        | 可能的值：                                                                                     |
+|                  |           |        | 00 - STENCIL_KEEP: 新值 = 旧值                                                                 |
+|                  |           |        | 01 - STENCIL_ZERO: 新值 = 0                                                                   |
+|                  |           |        | 02 - STENCIL_ONES: 新值 = 8'hff                                                               |
+|                  |           |        | 03 - STENCIL_REPLACE_TEST: 新值 = STENCIL_TEST_VAL                                             |
+|                  |           |        | 04 - STENCIL_REPLACE_OP: 新值 = STENCIL_OP_VAL                                                 |
+|                  |           |        | 05 - STENCIL_ADD_CLAMP: 新值 = 旧值 + STENCIL_OP_VAL（夹紧）                                     |
+|                  |           |        | 06 - STENCIL_SUB_CLAMP: 新值 = 旧值 - STENCIL_OP_VAL（夹紧）                                     |
+|                  |           |        | 07 - STENCIL_INVERT: 新值 = 〜旧值                                                            |
+|                  |           |        | 08 - STENCIL_ADD_WRAP: 新值 = 旧值 + STENCIL_OP_VAL（环绕）                                     |
+|                  |           |        | 09 - STENCIL_SUB_WRAP: 新值 = 旧值 - STENCIL_OP_VAL（环绕）                                     |
+|                  |           |        | 10 - STENCIL_AND: 新值 = 旧值 & STENCIL_OP_VAL                                                |
+|                  |           |        | 11 - STENCIL_OR: 新值 = 旧值 | STENCIL_OP_VAL                                                 |
+|                  |           |        | 12 - STENCIL_XOR: 新值 = 旧值 ^ STENCIL_OP_VAL                                                 |
+|                  |           |        | 13 - STENCIL_NAND: 新值 = 〜（旧值 & STENCIL_OP_VAL）                                           |
+|                  |           |        | 14 - STENCIL_NOR: 新值 = 〜（旧值 | STENCIL_OP_VAL）                                           |
+|                  |           |        | 15 - STENCIL_XNOR: 新值 = 〜（旧
+
+值 ^ STENCIL_OP_VAL）                                          |
+| STENCILZFAIL     | 11:8      | none   | 指定模板函数通过但深度函数失败时用于前向面四边形的模板操作。                                   |
+|                  |           |        | 可能的值：                                                                                     |
+|                  |           |        | 00 - STENCIL_KEEP: 新值 = 旧值                                                                 |
+|                  |           |        | 01 - STENCIL_ZERO: 新值 = 0                                                                   |
+|                  |           |        | 02 - STENCIL_ONES: 新值 = 8'hff                                                               |
+|                  |           |        | 03 - STENCIL_REPLACE_TEST: 新值 = STENCIL_TEST_VAL                                             |
+|                  |           |        | 04 - STENCIL_REPLACE_OP: 新值 = STENCIL_OP_VAL                                                 |
+|                  |           |        | 05 - STENCIL_ADD_CLAMP: 新值 = 旧值 + STENCIL_OP_VAL（夹紧）                                     |
+|                  |           |        | 06 - STENCIL_SUB_CLAMP: 新值 = 旧值 - STENCIL_OP_VAL（夹紧）                                     |
+|                  |           |        | 07 - STENCIL_INVERT: 新值 = 〜旧值                                                            |
+|                  |           |        | 08 - STENCIL_ADD_WRAP: 新值 = 旧值 + STENCIL_OP_VAL（环绕）                                     |
+|                  |           |        | 09 - STENCIL_SUB_WRAP: 新值 = 旧值 - STENCIL_OP_VAL（环绕）                                     |
+|                  |           |        | 10 - STENCIL_AND: 新值 = 旧值 & STENCIL_OP_VAL                                                |
+|                  |           |        | 11 - STENCIL_OR: 新值 = 旧值 | STENCIL_OP_VAL                                                 |
+|                  |           |        | 12 - STENCIL_XOR: 新值 = 旧值 ^ STENCIL_OP_VAL                                                 |
+|                  |           |        | 13 - STENCIL_NAND: 新值 = 〜（旧值 & STENCIL_OP_VAL）                                           |
+|                  |           |        | 14 - STENCIL_NOR: 新值 = 〜（旧值 | STENCIL_OP_VAL）                                           |
+|                  |           |        | 15 - STENCIL_XNOR: 新值 = 〜（旧值 ^ STENCIL_OP_VAL）                                          |
+| STENCILFAIL_BF   | 15:12     | none   | 指定模板函数失败时用于后向面四边形的模板操作。                                                 |
+|                  |           |        | 可能的值：                                                                                     |
+|                  |           |        | 00 - STENCIL_KEEP: 新值 = 旧值                                                                 |
+|                  |           |        | 01 - STENCIL_ZERO: 新值 = 0                                                                   |
+|                  |           |        | 02 - STENCIL_ONES: 新值 = 8'hff                                                               |
+|                  |           |        | 03 - STENCIL_REPLACE_TEST: 新值 = STENCIL_TEST_VAL                                             |
+|                  |           |        | 04 - STENCIL_REPLACE_OP: 新值 = STENCIL_OP_VAL                                                 |
+|                  |           |        | 05 - STENCIL_ADD_CLAMP: 新值 = 旧值 + STENCIL_OP_VAL（夹紧）                                     |
+|                  |           |        | 06 - STENCIL_SUB_CLAMP: 新值 = 旧值 - STENCIL_OP_VAL（夹紧）                                     |
+|                  |           |        | 07 - STENCIL_INVERT: 新值 = 〜旧值                                                            |
+|                  |           |        | 08 - STENCIL_ADD_WRAP: 新值 = 旧值 + STENCIL_OP_VAL（环绕）                                     |
+|                  |           |        | 09 - STENCIL_SUB_WRAP: 新值 = 旧值 - STENCIL_OP_VAL（环绕）                                     |
+|                  |           |        | 10 - STENCIL_AND: 新值 = 旧值 & STENCIL_OP_VAL                                                |
+|                  |           |        | 11 - STENCIL_OR: 新值 = 旧值 | STENCIL_OP_VAL                                                 |
+|                  |           |        | 12 - STENCIL_XOR: 新值 = 旧值 ^ STENCIL_OP_VAL                                                 |
+|                  |           |        | 13 - STENCIL_NAND: 新值 = 〜（旧值 & STENCIL_OP_VAL）                                           |
+|                  |           |        | 14 - STENCIL_NOR: 新值 = 〜（旧值 | STENCIL_OP_VAL）                                           |
+|                  |           |        | 15 - STENCIL_XNOR: 新值 = 〜（旧值 ^ STENCIL_OP_VAL）                                          |
+| STENCILZPASS_BF  | 19:16     | none   | 指定模板和深度函数都通过时用于后向面四边形的模板操作。                                       |
+|                  |           |        | 可能的值
+
+：                                                                                     |
+|                  |           |        | 00 - STENCIL_KEEP: 新值 = 旧值                                                                 |
+|                  |           |        | 01 - STENCIL_ZERO: 新值 = 0                                                                   |
+|                  |           |        | 02 - STENCIL_ONES: 新值 = 8'hff                                                               |
+|                  |           |        | 03 - STENCIL_REPLACE_TEST: 新值 = STENCIL_TEST_VAL                                             |
+|                  |           |        | 04 - STENCIL_REPLACE_OP: 新值 = STENCIL_OP_VAL                                                 |
+|                  |           |        | 05 - STENCIL_ADD_CLAMP: 新值 = 旧值 + STENCIL_OP_VAL（夹紧）                                     |
+|                  |           |        | 06 - STENCIL_SUB_CLAMP: 新值 = 旧值 - STENCIL_OP_VAL（夹紧）                                     |
+|                  |           |        | 07 - STENCIL_INVERT: 新值 = 〜旧值                                                            |
+|                  |           |        | 08 - STENCIL_ADD_WRAP: 新值 = 旧值 + STENCIL_OP_VAL（环绕）                                     |
+|                  |           |        | 09 - STENCIL_SUB_WRAP: 新值 = 旧值 - STENCIL_OP_VAL（环绕）                                     |
+|                  |           |        | 10 - STENCIL_AND: 新值 = 旧值 & STENCIL_OP_VAL                                                |
+|                  |           |        | 11 - STENCIL_OR: 新值 = 旧值 | STENCIL_OP_VAL                                                 |
+|                  |           |        | 12 - STENCIL_XOR: 新值 = 旧值 ^ STENCIL_OP_VAL                                                 |
+|                  |           |        | 13 - STENCIL_NAND: 新值 = 〜（旧值 & STENCIL_OP_VAL）                                           |
+|                  |           |        | 14 - STENCIL_NOR: 新值 = 〜（旧值 | STENCIL_OP_VAL）                                           |
+|                  |           |        | 15 - STENCIL_XNOR: 新值 = 〜（旧值 ^ STENCIL_OP_VAL）                                          |
+| STENCILZFAIL_BF  | 23:20     | none   | 指定模板函数通过但深度函数失败时用于后向面四边形的模板操作。                                   |
+|                  |           |        | 可能的值：                                                                                     |
+|                  |           |        | 00 - STENCIL_KEEP: 新值 = 旧值                                                                 |
+|                  |           |        | 01 - STENCIL_ZERO: 新值 = 0                                                                   |
+|                  |           |        | 02 - STENCIL_ONES: 新值 = 8'hff                                                               |
+|                  |           |        | 03 - STENCIL_REPLACE_TEST: 新值 = STENCIL_TEST_VAL                                             |
+|                  |           |        | 04 - STENCIL_REPLACE_OP: 新值 = STENCIL_OP_VAL                                                 |
+|                  |           |        | 05 - STENCIL_ADD_CLAMP: 新值 = 旧值 + STENCIL_OP_VAL（夹紧）                                     |
+|                  |           |        | 06 - STENCIL_SUB_CLAMP: 新值 = 旧值 - STENCIL_OP_VAL（夹紧）                                     |
+|                  |           |        | 07 - STENCIL_INVERT: 新值 = 〜旧值                                                            |
+|                  |           |        | 08 - STENCIL_ADD_WRAP: 新值 = 旧值 + STENCIL_OP_VAL（环绕）                                     |
+|                  |           |        | 09 - STENCIL_SUB_WRAP: 新值 = 旧值 - STENCIL_OP_VAL（环绕）                                     |
+|                  |           |        | 10 - STENCIL_AND: 新值 = 旧值 & STENCIL_OP_VAL                                                |
+|                  |           |        | 11 - STENCIL_OR: 新值 = 旧值 | STENCIL_OP_VAL                                                 |
+|                  |           |        | 12 - STENCIL_XOR: 新值 = 旧值 ^ STENCIL_OP_VAL                                                 |
+|                  |           |        | 13 - STENCIL_NAND: 新值 = 〜（旧值 & STENCIL_OP_VAL）                                           |
+|                  |           |        | 14 - STENCIL_NOR: 新值 = 〜（旧值 | STENCIL_OP_VAL）                                           |
+|                  |           |        | 15 - STENCIL_XNOR: 新值 = 〜（旧值 ^ STENCIL_OP_VAL）                                          |
+
+这些字段控制模板测试在前向面和后向面四边形上的操作。根据模板测试的结果和深度测试的结果，可以使用不同的操作来更新模板缓冲区的值。您可以根据需要配置这些字段以实现所需的模板测试行为。
+
+
+### DB_STENCIL_INFO
+
+
+DB:DB_STENCIL_INFO 寄存器是一个可读写的 32 位寄存器，用于配置模板测试过程中的模板缓冲区的属性。该寄存器的地址为 0x28044。
+
+以下是字段的定义：
+
+| 字段名称            | 位范围    | 默认值 | 描述                                                                                     |
+|--------------------|-----------|--------|------------------------------------------------------------------------------------------|
+| FORMAT             | 0         | none   | 指定模板组件的大小。                                                                      |
+|                    |           |        | 可能的值：                                                                               |
+|                    |           |        | 00 - STENCIL_INVALID: 无效的模板表面。                                                   |
+|                    |           |        | 01 - STENCIL_8: 8 位整数模板表面。                                                        |
+| TILE_MODE_INDEX    | 22:20     | none   | 该表面将用于 tile_split 的 GB_TILE_MODEn 寄存器的索引。所有其他字段将来自 DB_Z_INFO 寄存器。 |
+| ALLOW_EXPCLEAR     | 27        | none   | 允许模板内存格式跟踪扩展和清除。                                                           |
+| TILE_STENCIL_DISABLE | 29      | none   | 表示 htile 缓冲区没有模板元数据。这提高了 hiz 的精度，但取消了模板压缩或 HiStencil 优化的使用。 |
+
+### DB_STENCIL_READ_BASE
+
+DB:DB_STENCIL_READ_BASE 寄存器是一个可读写的 32 位寄存器，用于配置模板读取过程中的模板缓冲区的地址。该寄存器的地址为 0x2804c。
+
+以下是字段的定义：
+
+| 字段名称      | 位范围    | 默认值 | 描述                                             |
+|--------------|-----------|--------|--------------------------------------------------|
+| BASE_256B    | 31:0      | none   | 模板读取操作中的模板表面的首字节位置，必须是 256 字节对齐的。40 位地址的高 32 位。 |
+
+这个字段允许指定用于读取模板的模板缓冲区的起始地址，以便在渲染过程中读取模板数据。
+
+
+###  DB_Z_INFO
+
+DB:DB_Z_INFO 寄存器是一个可读写的 32 位寄存器，用于控制深度缓冲区（Z 缓冲区）的属性和行为。该寄存器的地址为 0x28040。
+
+以下是字段的定义：
+
+| 字段名称           | 位范围 | 默认值 | 描述                                                                                                   |
+|-------------------|--------|--------|--------------------------------------------------------------------------------------------------------|
+| FORMAT            | 1:0    | none   | 指定深度分量的大小以及深度是否为浮点数。                                                            |
+|                   |        |        | 可能的值：                                                                                             |
+|                   |        |        | 00 - Z_INVALID：无效的深度表面。                                                                      |
+|                   |        |        | 01 - Z_16：16 位 UNORM 深度表面。                                                                    |
+|                   |        |        | 02 - Z_24：（已弃用：请改用 Z_32_FLOAT）24 位 UNORM 深度表面。                                           |
+|                   |        |        | 03 - Z_32_FLOAT：32 位浮点深度表面。                                                                |
+| NUM_SAMPLES       | 3:2    | none   | 指定 Z 表面的多重采样（MSAA）表面占用。                                                            |
+| TILE_MODE_INDEX   | 22:20  | none   | 指示此表面将使用的 GB_TILE_MODEn 寄存器的索引。                                                        |
+| ALLOW_EXPCLEAR    | 27     | none   | 允许 ZMask 跟踪扩展和清除。                                                                         |
+| READ_SIZE         | 28     | none   | 设置读取的最小大小为 512 位。如果该表面位于具有小于 512 位访问的内存池中，则设置此选项。              |
+|                   |        |        | 可能的值：                                                                                             |
+|                   |        |        | 00 - READ_256_BITS                                                                                     |
+|                   |        |        | 01 - READ_512_BITS                                                                                     |
+| TILE_SURFACE_ENABLE | 29   | none   | 启用读写 htile 数据。如果关闭，HiZ+S 也将关闭。                                                        |
+| ZRANGE_PRECISION  | 31     | none   | 0 = ZMin 是基础值，通常在执行 Z > 测试时设置。                                                             |
+|                   |        |        | 1 = ZMax 是基础值，通常在执行 Z < 测试时设置。                                                             |
+|                   |        |        | 基础值具有完整的 14 位精度。通过将基础值设置为 Max，在 < 测试中剔除时误差较小。                             |
+|                   |        |        | 仅可在完全表面清除后更改此字段。如果 TILE_Z_ONLY == 0，则此字段才具有意义。                                      |
+
+DB:DB_Z_INFO 寄存器允许您配置深度缓冲区的格式、多重采样属性以及其他深度缓冲区相关的选项。这些设置可以影响深度测试和渲染的行为。
+
+
+
+### 
+
+
+### CB_BLEND[0-7]_CONTROL
+
+CB:CB_BLEND[0-7]_CONTROL 寄存器是一个可读写的 32 位寄存器，用于控制混合（Blending）操作的设置。这些设置适用于渲染目标 RT0，而 RT1-7 的设置类似。该寄存器的地址范围为 0x28780 到 0x2879c。
+
+以下是字段的定义：
+
+**颜色混合（Color Blend）设置：**
+
+| 字段名称            | 位范围 | 默认值 | 描述                                                                                   |
+|--------------------|--------|--------|----------------------------------------------------------------------------------------|
+| COLOR_SRCBLEND     | 4:0    | none   | RGB 分量的源混合函数。BLEND_X 对应于 GL_X 混合函数。                                 |
+|                    |        |        | 可能的值：                                                                           |
+|                    |        |        | 00 - BLEND_ZERO：(d3d_zero)                                                        |
+|                    |        |        | 01 - BLEND_ONE：(d3d_one)                                                          |
+|                    |        |        | 02 - BLEND_SRC_COLOR：(d3d_srccolor)                                                |
+|                    |        |        | 03 - BLEND_ONE_MINUS_SRC_COLOR：(d3d_invsrccolor)                                    |
+|                    |        |        | 04 - BLEND_SRC_ALPHA：(d3d_srcalpha)                                                |
+|                    |        |        | 05 - BLEND_ONE_MINUS_SRC_ALPHA：(d3d_invsrcalpha)                                    |
+|                    |        |        | 06 - BLEND_DST_ALPHA：(d3d_destalpha)                                                |
+|                    |        |        | 07 - BLEND_ONE_MINUS_DST_ALPHA：(d3d_invdestalpha)                                    |
+|                    |        |        | 08 - BLEND_DST_COLOR：(d3d_destcolor)                                                |
+|                    |        |        | 09 - BLEND_ONE_MINUS_DST_COLOR：(d3d_invdestcolor)                                    |
+|                    |        |        | 10 - BLEND_SRC_ALPHA_SATURATE：(d3d_srcalphasat)                                    |
+|                    |        |        | 11 - 保留                                                                              |
+|                    |        |        | 12 - 保留                                                                              |
+|                    |        |        | 13 - BLEND_CONSTANT_COLOR：(d3d_blendfactor，使用相应的 RB_BLEND 分量)               |
+|                    |        |        | 14 - BLEND_ONE_MINUS_CONSTANT_COLOR：(d3d_invblendfactor)                             |
+|                    |        |        | 15 - BLEND_SRC1_COLOR：DX10 双源模式                                                 |
+|                    |        |        | 16 - BLEND_INV_SRC1_COLOR：DX10 双源模式                                             |
+|                    |        |        | 17 - BLEND_SRC1_ALPHA：DX10 双源模式                                                 |
+|                    |        |        | 18 - BLEND_INV_SRC1_ALPHA：DX10 双源模式                                             |
+|                    |        |        | 19 - BLEND_CONSTANT_ALPHA：(使用 RB_BLEND_ALPHA)                                   |
+|                    |        |        | 20 - BLEND_ONE_MINUS_CONSTANT_ALPHA：                                                  |
+| COLOR_COMB_FCN     | 7:5    | none   | RGB 分量的源/目标组合函数。结果被夹紧到可表示的范围。                           |
+|                    |        |        | 可能的值：                                                                           |
+|                    |        |        | 00 - COMB_DST_PLUS_SRC：(ADD)：Source*SRCBLEND + Dest*DSTBLEND                       |
+|                    |        |        | 01 - COMB_SRC_MINUS_DST：(SUBTRACT)：Source*SRCBLEND - Dest*DSTBLEND                  |
+|                    |        |        | 02 - COMB_MIN_DST_SRC：(MIN)：min(Source*SRCBLEND, Dest*DSTBLEND)                     |
+|                    |        |        | 03 - COMB_MAX_DST_SRC：(MAX)：max(Source*SRCBLEND, Dest*DSTBLEND)                     |
+|                    |        |        | 04 - COMB_DST_MINUS_SRC：(REVSUBTRACT)：Dest*DSTBLEND - Source*SRCBLEND               |
+
+**颜色混合（Color Blend）设置（续）：**
+
+| 字段名称            | 位范围 | 默认值 | 描述                                                                                    |
+|--------------------|--------|--------|-----------------------------------------------------------------------------------------|
+| COLOR_DESTBLEND    | 12:8   | none   | RGB 分量的目标混合函数。BLEND_X 对应于 GL_X 混合函数。                                |
+|                    |        |        | 可能的值：                                                                            |
+|                    |        |        | 00 - BLEND_ZERO：(d3d_zero)                                                         |
+|                    |        |        | 01 - BLEND_ONE：(d3d_one)                                                           |
+|                    |        |        | 02 - BLEND_SRC_COLOR：(d3d_srccolor)                                                 |
+|                    |        |        | 03 - BLEND_ONE_MINUS_SRC_COLOR：(d3d_invsrccolor)                                     |
+|                    |        |        | 04 - BLEND_SRC_ALPHA：(d3d_srcalpha)                                                 |
+|                    |        |        | 05 - BLEND_ONE_MINUS_SRC_ALPHA：(d3d_invsrcalpha)                                     |
+|                    |        |        | 06 - BLEND_DST_ALPHA：(d3d_destalpha)                                                 |
+|                    |        |        | 07 - BLEND_ONE_MINUS_DST_ALPHA：(d3d_invdestalpha)                                     |
+|                    |        |        | 08 - BLEND_DST_COLOR：(d3d_destcolor)                                                 |
+|                    |        |        | 09 - BLEND_ONE_MINUS_DST_COLOR：(d3d_invdestcolor)                                     |
+|                    |        |        | 10 - BLEND_SRC_ALPHA_SATURATE：(d3d_srcalphasat)                                     |
+|                    |        |        | 11 - 保留                                                                               |
+|                    |        |        | 12 - 保留                                                                               |
+|                    |        |        | 13 - BLEND_CONSTANT_COLOR：(d3d_blendfactor，使用相应的 RB_BLEND 分量)                |
+|                    |        |        | 14 - BLEND_ONE_MINUS_CONSTANT_COLOR：(d3d_invblendfactor)                              |
+|                    |        |        | 15 - BLEND_SRC1_COLOR：DX10 双源模式                                                    |
+|                    |        |        | 16 - BLEND_INV_SRC1_COLOR：DX10
+
+ 双源模式                                                |
+|                    |        |        | 17 - BLEND_SRC1_ALPHA：DX10 双源模式                                                    |
+|                    |        |        | 18 - BLEND_INV_SRC1_ALPHA：DX10 双源模式                                                |
+|                    |        |        | 19 - BLEND_CONSTANT_ALPHA：(使用 RB_BLEND_ALPHA)                                      |
+|                    |        |        | 20 - BLEND_ONE_MINUS_CONSTANT_ALPHA：                                                   |
+| ALPHA_SRCBLEND     | 20:16  | none   | Alpha 分量的源混合函数。BLEND_X 对应于 GL_X 混合函数。                                |
+|                    |        |        | 可能的值：                                                                            |
+|                    |        |        | 00 - BLEND_ZERO：(d3d_zero)                                                         |
+|                    |        |        | 01 - BLEND_ONE：(d3d_one)                                                           |
+|                    |        |        | 02 - BLEND_SRC_COLOR：(d3d_srccolor)                                                 |
+|                    |        |        | 03 - BLEND_ONE_MINUS_SRC_COLOR：(d3d_invsrccolor)                                     |
+|                    |        |        | 04 - BLEND_SRC_ALPHA：(d3d_srcalpha)                                                 |
+|                    |        |        | 05 - BLEND_ONE_MINUS_SRC_ALPHA：(d3d_invsrcalpha)                                     |
+|                    |        |        | 06 - BLEND_DST_ALPHA：(d3d_destalpha)                                                 |
+|                    |        |        | 07 - BLEND_ONE_MINUS_DST_ALPHA：(d3d_invdestalpha)                                     |
+|                    |        |        | 08 - BLEND_DST_COLOR：(d3d_destcolor)                                                 |
+|                    |        |        | 09 - BLEND_ONE_MINUS_DST_COLOR：(d3d_invdestcolor)                                     |
+|                    |        |        | 10 - BLEND_SRC_ALPHA_SATURATE：(d3d_srcalphasat)                                     |
+|                    |        |        | 11 - 保留                                                                               |
+|                    |        |        | 12 - 保留                                                                               |
+|                    |        |        | 13 - BLEND_CONSTANT_COLOR：(d3d_blendfactor，使用相应的 RB_BLEND 分量)                |
+|                    |        |        | 14 - BLEND_ONE_MINUS_CONSTANT_COLOR：(d3d_invblendfactor)                              |
+|                    |        |        | 15 - BLEND_SRC1_COLOR：DX10 双源模式                                                    |
+|                    |        |        | 16 - BLEND_INV_SRC1_COLOR：DX10 双源模式                                                |
+|                    |        |        | 17 - BLEND_SRC1_ALPHA：DX10 双源模式                                                    |
+|                    |        |        | 18 - BLEND_INV_SRC1_ALPHA：DX10 双源模式                                                |
+|                    |        |        | 19 - BLEND_CONSTANT_ALPHA：(使用 RB_BLEND_ALPHA)                                      |
+|                    |        |        | 20 - BLEND_ONE_MINUS_CONSTANT_ALPHA：                                                   |
+| ALPHA_COMB_FCN     | 23:21  | none   | Alpha 分量的源/目标组合函数。结果被夹紧到可表示的范围。                                |
+|                    |        |        | 注意，Min 和 Max 不会强制源和目标混合函数为 ONE。                                    |
+|                    |        |        | 可能的值：                                                                            |
+|                    |        |        | 00 - COMB_DST_PLUS_SRC：(ADD)：Source*SRCBLEND + Dest*DSTBLEND                        |
+|                    |        |        | 01 - COMB_SRC_MINUS_DST：(SUBTRACT)：Source*SRCBLEND - Dest*DSTBLEND                   |
+|                    |        |        | 02 - COMB_MIN_DST_SRC：(MIN)：min(Source*SRCBLEND, Dest*DSTBLEND)                      |
+|                    |        |        | 03 - COMB_MAX_DST_SRC：(MAX)：max(Source*SRCBLEND, Dest*DSTBLEND)                      |
+|                    |        |        | 04 - COMB_DST_MINUS_SRC：(REVSUBTRACT)：Dest*DSTBLEND - Source*SRCBLEND                |
+|                    |        |        |                                                                                       |
+| ALPHA_DESTBLEND    | 28:24  | none   | Alpha 分量的目标混合函数。BLEND_X 对应于 GL_X 混合函数。                                |
+|                    |        |        | 可能的值：                                                                            |
+|                    |        |        | 00 - BLEND_ZERO：(d3d_zero)                                                         |
+|                    |        |        | 01
+
+ - BLEND_ONE：(d3d_one)                                                           |
+|                    |        |        | 02 - BLEND_SRC_COLOR：(d3d_srccolor)                                                 |
+|                    |        |        | 03 - BLEND_ONE_MINUS_SRC_COLOR：(d3d_invsrccolor)                                     |
+|                    |        |        | 04 - BLEND_SRC_ALPHA：(d3d_srcalpha)                                                 |
+|                    |        |        | 05 - BLEND_ONE_MINUS_SRC_ALPHA：(d3d_invsrcalpha)                                     |
+|                    |        |        | 06 - BLEND_DST_ALPHA：(d3d_destalpha)                                                 |
+|                    |        |        | 07 - BLEND_ONE_MINUS_DST_ALPHA：(d3d_invdestalpha)                                     |
+|                    |        |        | 08 - BLEND_DST_COLOR：(d3d_destcolor)                                                 |
+|                    |        |        | 09 - BLEND_ONE_MINUS_DST_COLOR：(d3d_invdestcolor)                                     |
+|                    |        |        | 10 - BLEND_SRC_ALPHA_SATURATE：(d3d_srcalphasat)                                     |
+|                    |        |        | 11 - 保留                                                                               |
+|                    |        |        | 12 - 保留                                                                               |
+|                    |        |        | 13 - BLEND_CONSTANT_COLOR：(d3d_blendfactor，使用相应的 RB_BLEND 分量)                |
+|                    |        |        | 14 - BLEND_ONE_MINUS_CONSTANT_COLOR：(d3d_invblendfactor)                              |
+|                    |        |        | 15 - BLEND_SRC1_COLOR：DX10 双源模式                                                    |
+|                    |        |        | 16 - BLEND_INV_SRC1_COLOR：DX10 双源模式                                                |
+|                    |        |        | 17 - BLEND_SRC1_ALPHA：DX10 双源模式                                                    |
+|                    |        |        | 18 - BLEND_INV_SRC1_ALPHA：DX10 双源模式                                                |
+|                    |        |        | 19 - BLEND_CONSTANT_ALPHA：(使用 RB_BLEND_ALPHA)                                      |
+|                    |        |        | 20 - BLEND_ONE_MINUS_CONSTANT_ALPHA：                                                   |
+| SEPARATE_ALPHA_BLEND | 29     | none   | 如果为 false，则使用颜色混合模式来混合 alpha 通道。如果为 true，则使用 ALPHA_ 字段来控制混合到 alpha 通道。 |
+| ENABLE             | 30     | none   | 1=启用此 MRT 的混合，0=禁用此 MRT 的混合。如果启用混合，则它会覆盖并禁用 ROP3。                      |
+| DISABLE_ROP3       | 31     | 0x0    | (默认) 0=启用此 MRT 的 ROP3，1=禁用此 MRT 的 ROP3。如果启用混合，则 ROP3 会被覆盖并禁用。                    |
+
+这些设置允许您控制颜色和 alpha 通道的混合方式，从而实现复杂的图形效果。您可以选择不同的混合函数和混合因子，以控制颜色和 alpha 通道的混合方式，从而创建所需的视觉效果。通过启用或禁用混合和 ROP3，您可以更精细地控制渲染目标的输出。
+
+
+
+
+### CB_BLEND_ALPHA
+
+### CB_BLEND_BLUE
+
+### CB_BLEND_GREEN
+
+
+### CB_BLEND_RED
+
+### CB_COLOR[0-7]_ATTRIB
+
+CB:CB_COLOR[0-7]_ATTRIB 是一组可读写的 32 位寄存器，用于配置颜色缓冲区（COLOR surface）和相关属性的信息，其中 RT0 对应 CB:CB_COLOR0_ATTRIB，RT1 对应 CB:CB_COLOR1_ATTRIB，以此类推。这些寄存器的地址范围从 0x28c74 到 0x28e18。
+
+以下是字段的定义：
+
+| 字段名称               | 位范围    | 默认值 | 描述                                                                                                                                                  |
+|------------------------|-----------|--------|-------------------------------------------------------------------------------------------------------------------------------------------------------|
+| TILE_MODE_INDEX        | 4:0       | none   | 用于查找 GB_TILE_MODEn 寄存器以配置 COLOR 和 CMASK surface 的平铺设置的索引。                                                                     |
+| FMASK_TILE_MODE_INDEX  | 9:5       | none   | 用于查找 GB_TILE_MODEn 寄存器以配置 FMASK surface 的平铺设置的索引。                                                                              |
+| NUM_SAMPLES            | 14:12     | none   | 指定样本数量的对数。这个值不能大于 4（即 16 个样本）。                                                                                                   |
+| NUM_FRAGMENTS          | 16:15     | none   | 指定片段数量的对数。这个值不能大于 MIN(NUM_SAMPLES, 3)，因为 log2(3) == 8 片段。                                                                    |
+| FORCE_DST_ALPHA_1      | 17        | none   | 如果设置了此标志，将强制 DST_ALPHA=1.0f。适用于不具有 alpha 分量的格式。                                                                             |
+
+CB_COLOR[0-7]_ATTRIB 寄存器用于配置与颜色缓冲区相关的属性，包括平铺模式、样本数量和片段数量等。这些属性的配置可以影响渲染的质量和性能。通过调整这些属性，可以满足不同渲染需求的要求。
+
+
+### CB_COLOR[0-7]_BASE
+
+CB:CB_COLOR[0-7]_BASE 是一组可读写的 32 位寄存器，用于配置颜色缓冲区（COLOR surface）的基地址，其中 RT0 对应 CB:CB_COLOR0_BASE，RT1 对应 CB:CB_COLOR1_BASE，以此类推。这些寄存器的地址范围从 0x28c60 到 0x28e04。
+
+以下是字段的定义：
+
+| 字段名称   | 位范围 | 默认值 | 描述                                                                                                                                                                                             |
+|------------|--------|--------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| BASE_256B  | 31:0   | none   | 该字段的 8 位到 39 位（共 32 位）指定了设备地址空间中 COLOR surface 的起始字节地址的高位部分。                                                                                                                                                                       |
+| PIPE_SWZ   | p-1:0  |        | 如果使用了管道（pipe） swizzle，则这些位（p-1:0）指定了管道 swizzle。p 的值等于 log2(numPipes)，其中 numPipes 是管道数量。                                                                                                                                        |
+| BANK_SWZ   | p+b-1:p |        | 如果使用了银行（bank） swizzle，则这些位（p+b-1:p）指定了银行 swizzle。b 的值等于 log2(numBanks)，其中 numBanks 是银行数量。                                                                                                                                  |
+
+BASE_256B 寄存器的主要作用是配置 COLOR surface 的起始地址，以指示 GPU 在设备内存中查找渲染目标的颜色数据。这些寄存器的配置可以影响渲染目标的读写行为，并可以使用 swizzle 选项进行微调，以便更好地优化内存访问。
+
+### CB_COLOR[0-7]_CLEAR_WORD0
+
+CB:CB_COLOR[0-7]_CLEAR_WORD0 是一组可读写的 32 位寄存器，用于配置清除颜色的低位（Bits [31:0]）数据。每个渲染目标都有对应的 CLEAR_WORD0 寄存器，其中 RT0 对应 CB:CB_COLOR0_CLEAR_WORD0，RT1 对应 CB:CB_COLOR1_CLEAR_WORD0，以此类推。这些寄存器的地址范围从 0x28c8c 到 0x28e30。
+
+以下是字段的定义：
+
+| 字段名称    | 位范围 | 默认值 | 描述                             |
+|-------------|--------|--------|----------------------------------|
+| CLEAR_WORD0 | 31:0   | none   | 清除颜色的低位数据（Bits [31:0]）。 |
+
+CLEAR_WORD0 寄存器的作用是配置清除颜色的低位数据，这些数据用于在执行清除操作时覆盖渲染目标的颜色数据。这些寄存器的配置可以影响渲染目标的清除行为。
+
+
+### CB_COLOR[0-7]_CLEAR_WORD1
+
+CB:CB_COLOR[0-7]_CLEAR_WORD1 是一组可读写的 32 位寄存器，用于配置清除颜色的高位（Bits [63:32]）数据。每个渲染目标都有对应的 CLEAR_WORD1 寄存器，其中 RT0 对应 CB:CB_COLOR0_CLEAR_WORD1，RT1 对应 CB:CB_COLOR1_CLEAR_WORD1，以此类推。这些寄存器的地址范围从 0x28c90 到 0x28e34。
+
+以下是字段的定义：
+
+| 字段名称    | 位范围 | 默认值 | 描述                             |
+|-------------|--------|--------|----------------------------------|
+| CLEAR_WORD1 | 31:0   | none   | 清除颜色的高位数据（Bits [63:32]）。 |
+
+CLEAR_WORD1 寄存器的作用是配置清除颜色的高位数据，这些数据用于在执行清除操作时覆盖渲染目标的颜色数据。这些寄存器的配置可以影响渲染目标的清除行为。
+
+
+
+### CB_COLOR[0-7]_CMASK
+
+CB:CB_COLOR[0-7]_CMASK 寄存器是一组可读写的 32 位寄存器，用于配置 CMASK（Color Mask）表面的基地址，其中 RT0 对应 CB:CB_COLOR0_CMASK，RT1 对应 CB:CB_COLOR1_CMASK，以此类推。这些寄存器的地址范围从 0x28c7c 到 0x28e20。
+
+以下是字段的定义：
+
+| 字段名称  | 位范围 | 默认值 | 描述                                                                                   |
+|-----------|--------|--------|----------------------------------------------------------------------------------------|
+| BASE_256B | 31:0   | none   | 指定设备地址空间中每个瓦片 CMASK 数据的起始字节地址的位 [39:8]。 |
+
+CB:CB_COLOR[0-7]_CMASK 寄存器用于配置 CMASK 表面的基地址，CMASK 是一个用于渲染中的颜色蒙版数据的缓冲区。这些寄存器允许您定义每个渲染目标的 CMASK 表面的基地址，以便在渲染过程中使用 CMASK 数据来控制像素的写入。
+
+
+### CB_COLOR[0-7]_CMASK_SLICE
+
+
+CB:CB_COLOR[0-7]_CMASK_SLICE 寄存器是一组可读写的 32 位寄存器，用于配置 CMASK（Color Mask）表面的切片大小，其中 RT0 对应 CB:CB_COLOR0_CMASK_SLICE，RT1 对应 CB:CB_COLOR1_CMASK_SLICE，以此类推。这些寄存器的地址范围从 0x28c80 到 0x28e24。
+
+以下是字段的定义：
+
+| 字段名称  | 位范围 | 默认值 | 描述                                                                                   |
+|-----------|--------|--------|----------------------------------------------------------------------------------------|
+| TILE_MAX  | 13:0   | none   | 编码了切片的大小。该字段等于每个切片的 CMASK 数据的 128x128 块（16x16 块）的数量减 1。 |
+
+CB:CB_COLOR[0-7]_CMASK_SLICE 寄存器用于配置 CMASK 表面的切片大小。CMASK 是一个用于渲染中的颜色蒙版数据的缓冲区。这些寄存器允许您定义每个渲染目标的 CMASK 表面的切片大小，以满足特定的渲染需求。
+
+
+### CB_COLOR[0-7]_FMASK 
+
+
+CB:CB_COLOR[0-7]_FMASK 寄存器是一组可读写的 32 位寄存器，用于配置 FMASK（Fragment Mask）表面的基地址，其中 RT0 对应 CB:CB_COLOR0_FMASK，RT1 对应 CB:CB_COLOR1_FMASK，以此类推。这些寄存器的地址范围从 0x28c84 到 0x28e28。
+
+以下是字段的定义：
+
+| 字段名称 | 位范围 | 默认值 | 描述                                                         |
+|----------|--------|--------|--------------------------------------------------------------|
+| BASE_256B | 31:0   | none   | 这指定了资源在设备地址空间中起始位置的字节地址的[39:8]位。您可以在此处指定管道和银行的分布。具体来说： |
+|          |        |        | - 该字段的低位 [p-1:0]，其中 p = log2(numPipes)，指定了管道分布。        |
+|          |        |        | - 该字段的 [p+b-1:p] 位，其中 b = log2(numBanks)，指定了银行分布。      |
+
+CB:CB_COLOR[0-7]_FMASK 寄存器用于配置 FMASK 表面的基地址。FMASK 是一个用于遮挡和光栅化的辅助缓冲区，通常用于多重采样渲染中。这些寄存器允许您定义每个渲染目标的 FMASK 表面的基地址，以满足特定的渲染需求。其中包括管道和银行的分布设置。
+
+
+### CB_COLOR[0-7]_FMASK_SLICE
+
+CB:CB_COLOR[0-7]_FMASK_SLICE 寄存器是一组可读写的 32 位寄存器，用于配置 FMASK（Fragment Mask）表面切片的大小。类似地，对于每个渲染目标，例如 CB:CB_COLOR0_FMASK_SLICE 对应 RT0，CB:CB_COLOR1_FMASK_SLICE 对应 RT1，以此类推。这些寄存器的地址范围从 0x28c88 到 0x28e2c。
+
+以下是字段的定义：
+
+| 字段名称   | 位范围 | 默认值 | 描述                                                         |
+|------------|--------|--------|--------------------------------------------------------------|
+| TILE_MAX   | 21:0   | none   | 编码了切片的大小。该字段等于每个切片的 8x8 瓦片的数量减一。 |
+
+CB:CB_COLOR[0-7]_FMASK_SLICE 寄存器用于配置 FMASK 表面切片的大小。FMASK 是一个用于遮挡和光栅化的辅助缓冲区，通常用于多重采样渲染中。这些寄存器允许您定义每个渲染目标的 FMASK 表面切片的大小，以满足特定的渲染需求。
+
+### CB_COLOR_[0-7]_INFO
+
+CB:CB_COLOR[0-7]_INFO 寄存器用于描述颜色渲染目标 (RT) 0 的表面格式信息，类似地，RT1-7 也有相似的寄存器。这些寄存器的地址范围从 0x28c70 到 0x28e14。
+
+以下是字段的定义：
+
+| 字段名称              | 位范围 | 默认值 | 描述                                                                                                  |
+|----------------------|--------|--------|-------------------------------------------------------------------------------------------------------|
+| ENDIAN               | 1:0    | none   | 指定在不同大小端模式下是否执行字节交换，字节交换相当于计算 dest[A] = src[A XOR N]，其中 A 是字节地址，N 是下面列出的 XOR 值。 |
+|                      |        |        | 可能的值：                                                                                            |
+|                      |        |        | 00 - ENDIAN_NONE: 无字节交换 (XOR 0)                                                                |
+|                      |        |        | 01 - ENDIAN_8IN16: 在 16 位字内部进行 8 位交换 (XOR 1): 0xAABBCCDD -> 0xBBAADDCC                      |
+|                      |        |        | 02 - ENDIAN_8IN32: 在 32 位字内部进行 8 位交换 (XOR 3): 0xAABBCCDD -> 0xDDCCBBAA                      |
+|                      |        |        | 03 - ENDIAN_8IN64: 在 64 位字内部进行 8 位交换 (XOR 7): 0xaabbccddeeffgghh -> 0xhhggffeeddccbbaa         |
+| FORMAT               | 6:2    | none   | 指定颜色分量的大小，在某些情况下还指定数字格式。请参阅下面的 COMP_SWAP 字段，了解将 RGBA（XYZW）着色器管线结果映射到像素格式中的颜色分量位置。从表面读取时，格式中缺失的分量将被默认值替代：RGB 为 0.0 或 Alpha 为 1.0。 |
+|                      |        |        | 可能的值：                                                                                            |
+|                      |        |        | 00 - COLOR_INVALID: 此资源已禁用                                                                      |
+|                      |        |        | 01 - COLOR_8: 标准化、整数                                                                              |
+|                      |        |        | 02 - COLOR_16: 标准化、整数、浮点                                                                        |
+|                      |        |        | 03 - COLOR_8_8: 标准化、整数                                                                            |
+|                      |        |        | 04 - COLOR_32: 整数、浮点                                                                               |
+|                      |        |        | 05 - COLOR_16_16: 标准化、整数、浮点                                                                    |
+|                      |        |        | 06 - COLOR_10_11_11: 仅浮点                                                                             |
+|                      |        |        | 07 - COLOR_11_11_10: 仅浮点                                                                             |
+|                      |        |        | 08 - COLOR_10_10_10_2: 标准化、整数                                                                    |
+|                      |        |        | 09 - COLOR_2_10_10_10: 标准化、整数                                                                    |
+|                      |        |        | 10 - COLOR_8_8_8_8: 标准化、整数、sRGB                                                                 |
+|                      |        |        | 11 - COLOR_32_32: 整数、浮点                                                                           |
+|                      |        |        | 12 - COLOR_16_16_16_16: 标准化、整数、浮点                                                               |
+|                      |        |        | 13 - RESERVED                                                                                         |
+|                      |        |        | 14 - COLOR_32_32_32_32: 整数、浮点                                                                     |
+|                      |        |        | 15 - RESERVED                                                                                         |
+|                      |        |        | 16 - COLOR_5_6_5: 仅标准化                                                                            |
+|                      |        |        | 17 - COLOR_1_5_5_5: 仅标准化，1 位组件始终是 unorm                                                      |
+|                      |        |        | 18 - COLOR_5_5_5_1: 仅标准化，1 位组件始终是 unorm                                                      |
+|                      |        |        |
+
+19 - COLOR_4_4_4_4: 仅标准化                                                                          |
+|                      |        |        | 20 - COLOR_8_24: unorm 深度，uint 模板                                                                   |
+|                      |        |        | 21 - COLOR_24_8: unorm 深度，uint 模板                                                                   |
+|                      |        |        | 22 - COLOR_X24_8_32_FLOAT: 浮点深度，uint 模板                                                           |
+|                      |        |        | 23 - RESERVED                                                                                         |
+| LINEAR_GENERAL        | 7      | none   | 1: 覆盖 ARRAY_MODE 为 ARRAY_LINEAR_GENERAL，忽略 CB_COLOR0_ATTRIB.TILE_MODE_INDEX 设置。                |
+|                      |        |        | 0: ARRAY_MODE=GB_TILE_MODE[CB_COLOR0_ATTRIB.TILE_MODE_INDEX].ARRAY_MODE                                |
+| NUMBER_TYPE           | 10:8   | none   | 指定颜色分量的数字类型。                                                                               |
+|                      |        |        | 可能的值：                                                                                            |
+|                      |        |        | 00 - NUMBER_UNORM: 无符号重复小数 (urf)：范围 [0..1]，尺度因子 (2^n)-1                                  |
+|                      |        |        | 01 - NUMBER_SNORM: Microsoft 风格的有符号小数 (rf)：范围 [-1..1]，尺度因子 (2^(n-1))-1                   |
+|                      |        |        | 02 - 保留                                                                                            |
+|                      |        |        | 03 - 保留                                                                                            |
+|                      |        |        | 04 - NUMBER_UINT: 零扩展位域，着色器中为 int：不可混合或可过滤                                            |
+|                      |        |        | 05 - NUMBER_SINT: 符号扩展位域，着色器中为 int：不可混合或可过滤                                          |
+|                      |        |        | 06 - NUMBER_SRGB: 伽马校正，范围 [0..1]（仅支持 COLOR_8_8_8_8 格式；总是将颜色通道四舍五入）             |
+|                      |        |        | 07 - NUMBER_FLOAT: 浮点数：32 位：IEEE 浮点，SE8M23，偏置 127，范围 (-2^129..2^129)；16 位：Short 浮点 SE5M10，偏置 15，范围 (-2^17..2^17)；11 位：打包浮点，E5M6 偏置 15，范围 [0..2^17)；10 位：打包浮点，E5M5 偏置 15，范围 [0..2^17) |
+| COMP_SWAP             | 12:11  | none   | 指定如何将着色器中的红、绿、蓝和 Alpha 分量映射到渲染目标像素格式中的组件位置（0、1、2、3，其中 0 最不显著，3 最显著）。 |
+|                      |        |        | 使用一个分量时，这将选择映射到单个渲染目标分量 (STD: R=>0; ALT: G=>0; STD_REV: B=>0; ALT_REV: A=>0)。 对于 2-4 个分量，SWAP_STD 始终将着色器分量映射到从 R=>0 开始的可用分量数量（分量 R=>0、G=>1、B=>2、A=>3）。 对于 2-3 个分量，SWAP_ALT 与 SWAP_STD 类似，除了来自着色器的 Alpha 总是发送到最后的渲染目标分量（2 个分量：R=>0、A=>1；3 个分量：R=>0、G=>1、A=>2）。 对于 4 个分量，SWAP_ALT 选择一种替代顺序（B=>0、G=>1、R=>2、A=>3）。 对于 2-4 个分量，SWAP_STD_REV 和 SWAP_ALT_REV 反转分量
+
+顺序。 |
+|                      |        |        | 可能的值：                                                                                            |
+|                      |        |        | 00 - SWAP_STD: 标准小端组件顺序                                                                       |
+|                      |        |        | 01 - SWAP_ALT: 替代组件或顺序                                                                         |
+|                      |        |        | 02 - SWAP_STD_REV: 反转 SWAP_STD 顺序                                                                  |
+|                      |        |        | 03 - SWAP_ALT_REV: 反转 SWAP_ALT 顺序                                                                  |
+| FAST_CLEAR            | 13     | none   | 启用快速清除。如果设置，CB 识别 cmask 中的快速清除编码，并将相应的瓦片区域视为已快速清除。                       |
+| COMPRESSION           | 14     | none   | 启用颜色压缩。                                                                                        |
+| BLEND_CLAMP           | 15     | none   | 指定是否在混合之前将源数据夹紧到格式范围内，以及混合后夹紧。此位必须在 BLEND_BYPASS 设置为 true 时清除。否则，它必须在任何分量为 SINT/UINT（NUMBER_TYPE = SINT、UINT，或 FORMAT = COLOR_8_24、COLOR_24_8、COLOR_X24_8_32_FLOAT） 时设置。 |
+| BLEND_BYPASS          | 16     | none   | 如果为 false，则该 MRT 的混合器根据 CB_BLENDn_CONTROL.ENABLE 中的指定启用/禁用。如果为 true，则禁用混合。当且仅当任何分量为 SINT/UINT（NUMBER_TYPE = SINT、UINT，或 FORMAT = COLOR_8_24、COLOR_24_8、COLOR_X24_8_32_FLOAT） 时，应设置此位。 |
+| SIMPLE_FLOAT          | 17     | 0x0    | 如果设置，通过忽略特殊值（如 NaN、+/-Inf 和 -0.0f）来简化浮点处理，以使 DESTBLEND*DST=0.0f 如果 DESTBLEND==0.0f 以及 SRCBLEND*SRC=0.0f 如果 SRCBLEND==0.0f。如果为 false，则浮点处理遵循特殊值（如 NaN、+/-Inf 和 -0.0f）的完整 IEEE 规则。对于浮点表面，设置此字段可以帮助启用以下混合优化：BLEND_OPT_DONT_RD_DST、BLEND_OPT_BYPASS 和 BLEND_OPT_DISCARD_PIXEL。对于其他组件格式，将忽略此位。 |
+| ROUND_MODE            | 18     | none   | 此字段选择将混合器结果转换为帧缓冲组件时的截断（浮点数的标准方式）和四舍五入之间的方式。如果任何分量为 UNORM、SNORM 或 SRGB，应将其设置为 ROUND_BY_HALF（此字段对于 COLOR_8_24 和 COLOR_24_8 被忽略）。 |
+|                      |        |        | 可能的值：                                                                                            |
+|                      |        |        | 00 - ROUND_BY_HALF: 加上 1/2 最低有效位，然后截断                                                      |
+|                      |        |        | 01 - ROUND_TRUNCATE: 截断到浮点数零值                                                                    |
+| CMASK_IS_LINEAR       | 19     | none   | 如果设置，Cmask 表面存储为线性存储。这可以减少 cmask 表面上的填充限制。                                |
+| BLEND_OPT_DONT_RD_DST | 22:20  | 0x0    | 不读取 DST 的混合优化：如果混合函数计算为 SRCBLEND*SRC +/- 0*DST 并且 SRBBLEND 也不需要 DST，那么不要读取 DST。 |
+|                      |        |        | 可能的值：                                                                                            |
+|                      |        |        | 00 - FORCE_OPT_AUTO: （默认）硬件自动检测并启用此优化                                                     |
+|                      |        |        | 01 - FORCE_OPT_DISABLE: 禁用此 RT 的优化                                                                |
+|                      |        |        | 02 -
+
+ FORCE_OPT_ENABLE_IF_SRC_A_0: 仅在 Src Alpha 为 0.0f 时启用优化                                      |
+|                      |        |        | 03 - FORCE_OPT_ENABLE_IF_SRC_RGB_0: 仅在 Src 颜色分量 (RGB) 都为 0.0f 时启用优化                           |
+|                      |        |        | 04 - FORCE_OPT_ENABLE_IF_SRC_ARGB_0: 仅在 Src 颜色分量 (RGB) 和 Alpha 都为 0.0f 时启用优化                   |
+|                      |        |        | 05 - FORCE_OPT_ENABLE_IF_SRC_A_1: 仅在 Src Alpha 为 1.0f 时启用优化                                      |
+|                      |        |        | 06 - FORCE_OPT_ENABLE_IF_SRC_RGB_1: 仅在 Src 颜色分量 (RGB) 都为 1.0f 时启用优化                           |
+|                      |        |        | 07 - FORCE_OPT_ENABLE_IF_SRC_ARGB_1: 仅在 Src 颜色分量 (RGB) 和 Alpha 都为 1.0f 时启用优化                   |
+| BLEND_OPT_DISCARD_PIXEL| 25:23  | 0x0    | 丢弃像素的混合优化：如果混合函数计算为 0*SRC +/- 1*DST，则这将成为 NOP。                                 |
+|                      |        |        | 可能的值：                                                                                            |
+|                      |        |        | 00 - FORCE_OPT_AUTO: （默认）硬件自动检测并启用此优化                                                     |
+|                      |        |        | 01 - FORCE_OPT_DISABLE: 禁用此 RT 的优化                                                                |
+|                      |        |        | 02 - FORCE_OPT_ENABLE_IF_SRC_A_0: 仅在 Src Alpha 为 0.0f 时启用优化                                      |
+|                      |        |        | 03 - FORCE_OPT_ENABLE_IF_SRC_RGB_0: 仅在 Src 颜色分量 (RGB) 都为 0.0f 时启用优化                           |
+|                      |        |        | 04 - FORCE_OPT_ENABLE_IF_SRC_ARGB_0: 仅在 Src 颜色分量 (RGB) 和 Alpha 都为 0.0f 时启用优化                   |
+|                      |        |        | 05 - FORCE_OPT_ENABLE_IF_SRC_A_1: 仅在 Src Alpha 为 1.0f 时启用优化                                      |
+|                      |        |        | 06 - FORCE_OPT_ENABLE_IF_SRC_RGB_1: 仅在 Src 颜色分量 (RGB) 都为 1.0f 时启用优化                           |
+|                      |        |        | 07 - FORCE_OPT_ENABLE_IF_SRC_ARGB_1: 仅在 Src 颜色分量 (RGB) 和 Alpha 都为 1.0f 时启用优化                   |
+
+这些字段允许配置颜色渲染目标的各种特性，包括颜色格式、字节顺序、数字类型、混合和优化选项等。这些设置可根据渲染需求和硬件支持进行调整，以获得最佳性能和效果。
+
+### CB_COLOR[0-7]_PITCH
+
+CB:CB_COLOR[0-7]_PITCH 寄存器是一组可读写的 32 位寄存器，用于控制渲染目标颜色缓冲区的扫描线间距（Pitch）。每个寄存器对应一个渲染目标，例如，CB:CB_COLOR0_PITCH 对应 RT0，CB:CB_COLOR1_PITCH 对应 RT1，以此类推。这些寄存器的地址范围从 0x28c64 到 0x28e08。
+
+以下是字段的定义：
+
+| 字段名称   | 位范围 | 默认值 | 描述                                                                                                    |
+|------------|--------|--------|---------------------------------------------------------------------------------------------------------|
+| TILE_MAX   | 10:0   | none   | 编码了扫描线的间距（Pitch）；如果 Pitch 是每个扫描线的数据元素数，那么这个字段是 (Pitch / 8) - 1，表示X维度上允许的最大 8x8 瓦片编号。 |
+
+CB:CB_COLOR[0-7]_PITCH 寄存器用于配置渲染目标颜色缓冲区的扫描线间距，以便在渲染过程中正确处理像素数据的存储。不同的渲染目标可以具有不同的扫描线间距，以满足渲染需求。
+
+
+
+### CB_COLOR[0-7]_SLICE
+
+CB:CB_COLOR[0-7]_SLICE 寄存器是一组可读写的 32 位寄存器，用于控制渲染目标颜色缓冲区的切片大小（Slice）。每个寄存器对应一个渲染目标，例如，CB:CB_COLOR0_SLICE 对应 RT0，CB:CB_COLOR1_SLICE 对应 RT1，以此类推。这些寄存器的地址范围从 0x28c68 到 0x28e0c。
+
+以下是字段的定义：
+
+| 字段名称   | 位范围 | 默认值 | 描述                                                                                                    |
+|------------|--------|--------|---------------------------------------------------------------------------------------------------------|
+| TILE_MAX   | 21:0   | none   | 编码了切片的大小。如果 SliceTiles 是一个切片中的最大瓦片数（等于 Pitch * Height / 64），那么这个字段是 SliceTiles - 1，表示允许的最大切片中的瓦片编号。 |
+
+CB:CB_COLOR[0-7]_SLICE 寄存器用于配置渲染目标颜色缓冲区的切片大小，以便在渲染过程中正确管理渲染目标的数据存储。不同的渲染目标可以具有不同的切片大小，以满足渲染需求。
+
+
+### CB_COLOR[0-7]_VIEW
+
+
+CB:CB_COLOR[0-7]_VIEW 寄存器是一组可读写的 32 位寄存器，用于选择渲染目标的切片索引范围。每个寄存器对应一个渲染目标，例如，CB:CB_COLOR0_VIEW 对应 RT0，CB:CB_COLOR1_VIEW 对应 RT1，以此类推。这些寄存器的地址范围从 0x28c6c 到 0x28e10。
+
+以下是字段的定义：
+
+| 字段名称     | 位范围 | 默认值 | 描述                                                                                                                                                                               |
+|--------------|--------|--------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| SLICE_START  | 10:0   | none   | 对于 ARRAY_LINEAR_GENERAL：此字段的[7:0]位指定资源的字节地址的[7:0]位。与 CB_COLOR*_BASE.BASE_256B 一起使用，指定 40 位起始地址。地址必须是元素对齐的。使用 ARRAY_LINEAR_GENERAL 时，由于 SLICE_START 没有实际值，因此在进行 rtindex（切片）夹紧时，假定 SLICE_START 值为零。对于所有其他表面，此字段指定了此视图的起始切片编号：此字段添加到 rtindex 以计算要呈现的切片。 |
+| SLICE_MAX    | 23:13  | none   | 指定此资源的允许的最大渲染目标切片索引（rtindex），这比总切片数少一个。如果超过此值，rtindex 将被夹紧到 SLICE_START。                                                                                                                  |
+
+CB:CB_COLOR[0-7]_VIEW 寄存器用于选择要呈现的渲染目标的切片索引范围。这些寄存器允许配置渲染目标的子区域以实现高级渲染技术，例如多视图渲染或渲染到纹理数组的特定切片。
+
+
+
+
+### CB:CB_COLOR_CONTROL 
+
+
+CB:CB_COLOR_CONTROL 是一个可读写的 32 位寄存器，用于控制通用的颜色缓冲（CB）行为，适用于所有多渲染目标（MRTs）。以下是字段的定义：
+
+| 字段名称         | 位范围 | 默认值 | 描述                                                                                   |
+|------------------|--------|--------|----------------------------------------------------------------------------------------|
+| DEGAMMA_ENABLE   | 3      | none   | 如果为真，则每个 UNORM 格式的 COLOR_8_8_8_8 或 COLOR_8 MRT 将被视为 SRGB 格式。这会影响正常绘制和解析操作。此位存在是为了与旧架构兼容，旧架构不具有 SRGB 数字类型。 |
+| MODE             | 6:4    | none   | 该字段选择标准颜色处理或几种主要操作模式。                                      |
+|                  |        |        | 可能的值：                                                                           |
+|                  |        |        | 00 - CB_DISABLE: 禁用对颜色缓冲的绘制。导致 DB 不会将瓦片/四块发送到 CB。CB 本身会忽略此字段。               |
+|                  |        |        | 01 - CB_NORMAL: 正常渲染模式。DB 应该发送用于像素导出的瓦片和四块。                                   |
+|                  |        |        | 02 - CB_ELIMINATE_FAST_CLEAR: 使用清除颜色填充已经快速清除的颜色表面位置。DB 应只发送瓦片。                   |
+|                  |        |        | 03 - CB_RESOLVE: 从 MRT0 读取，对所有样本求平均，并写入 MRT1，它是单样本的。DB 应该只发送瓦片。               |
+|                  |        |        | 04 - 保留                                                                                 |
+|                  |        |        | 05 - CB_FMASK_DECOMPRESS: 解压 FMASK 缓冲区以获得可读取的纹理格式。在执行此操作之前不需要 CB_ELIMINATE_FAST_CLEAR 通道。DB 应只发送瓦片。 |
+| ROP3             | 23:16  | none   | 此字段支持 28 个布尔操作，将源和目标或刷子和目标组合在一起，其中刷子由着色器提供，以替换源。代码 0xCC (11001100) 将源复制到目标，从而禁用 ROP 功能。如果任何 MRT 启用混合，必须禁用 ROP。 |
+|                  |        |        | 可能的值：                                                                           |
+|                  |        |        | 00 - 0x00: BLACKNESS                                                                     |
+|                  |        |        | 05 - 0x05                                                                                |
+|                  |        |        | 10 - 0x0A                                                                                |
+|                  |        |        | 15 - 0x0F                                                                                |
+|                  |        |        | 17 - 0x11: NOTSRCERASE                                                                   |
+|                  |        |        | 34 - 0x22                                                                                |
+|                  |        |        | 51 - 0x33: NOTSRCCOPY                                                                    |
+|                  |        |        | 68 - 0x44: SRCERASE                                                                      |
+|                  |        |        | 80 - 0x50                                                                                |
+|                  |        |        | 85 - 0x55: DSTINVERT                                                                     |
+|                  |        |        | 90 - 0x5A: PATINVERT                                                                     |
+|                  |        |        | 95 - 0x5F                                                                                |
+|                  |        |        | 102 - 0x66: SRCINVERT                                                                    |
+|                  |        |        | 119 - 0x77                                                                               |
+|                  |        |        | 136 - 0x88: SRCAND                                                                       |
+|                  |        |        | 153 - 0x99                                                                               |
+|                  |        |        | 160 - 0xA0                                                                               |
+|                  |        |        | 165 - 0xA5                                                                               |
+|                  |        |        | 170 - 0xAA                                                                               |
+|                  |        |        | 175 - 0xAF                                                                               |
+|                  |        |        | 187 - 0xBB: MERGEPAINT                                                                    |
+|                  |        |        | 204 - 0xCC: SRCCOPY                                                                      |
+|                  |        |        | 221 - 0xDD                                                                               |
+|                  |        |        | 238 - 0xEE: SRCPAINT                                                                     |
+|                  |        |        | 240 - 0xF0: PATCOPY                                                                      |
+|                  |        |        | 245 - 0xF5                                                                               |
+|                  |        |        |
+
+250 - 0xFA                                                                               |
+|                  |        |        | 255 - 0xFF: WHITENESS                                                                    |
+
+CB:CB_COLOR_CONTROL 寄存器用于控制颜色缓冲的行为，包括颜色处理模式、混合操作和其他相关设置。可以根据应用程序的需要配置这些字段，以影响渲染的结果。
+
+### CB_SHADER_MASK
+
+
+### CB_TARGET_MASK
+
+CB:CB_TARGET_MASK 寄存器是一个可读写的 32 位寄存器，用于控制写入多渲染目标 (MRTs) 的颜色组件掩码。该寄存器的地址为 0x28238。
+
+以下是字段的定义：
+
+| 字段名称         | 位范围 | 默认值 | 描述                                                                                                                |
+|-----------------|--------|--------|---------------------------------------------------------------------------------------------------------------------|
+| TARGET0_ENABLE  | 3:0    | none   | 启用对 RT 0 组件的写入。低位对应红色通道。0 位禁止对该通道的写入，1 位启用对该通道的写入。                          |
+| TARGET1_ENABLE  | 7:4    | none   | 启用对 RT 1 组件的写入。                                                                                           |
+| TARGET2_ENABLE  | 11:8   | none   | 启用对 RT 2 组件的写入。                                                                                           |
+| TARGET3_ENABLE  | 15:12  | none   | 启用对 RT 3 组件的写入。                                                                                           |
+| TARGET4_ENABLE  | 19:16  | none   | 启用对 RT 4 组件的写入。                                                                                           |
+| TARGET5_ENABLE  | 23:20  | none   | 启用对 RT 5 组件的写入。                                                                                           |
+| TARGET6_ENABLE  | 27:24  | none   | 启用对 RT 6 组件的写入。                                                                                           |
+| TARGET7_ENABLE  | 31:28  | none   | 启用对 RT 7 组件的写入。                                                                                           |
+
+CB:CB_TARGET_MASK 寄存器允许控制多渲染目标的颜色组件写入，通过配置每个组件的使能位来选择是否写入对应的渲染目标。这些掩码字段使您可以选择哪些颜色通道会被写入到每个渲染目标中。
+
 
 
 

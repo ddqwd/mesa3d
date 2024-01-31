@@ -1,0 +1,1 @@
+/usr/bin/c++ -g -rdynamic CMakeFiles/geometry_shader_houses.dir/src/glad.c.o CMakeFiles/geometry_shader_houses.dir/geometry_shader_houses.cpp.o -o geometry_shader_houses  -lglfw -lGL -lX11 -lpthread -lXrandr -lXi -ldl 

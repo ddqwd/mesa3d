@@ -1,0 +1,317 @@
+
+# gs的内建变量及 hir生成
+
+## gs hir的初始化及内建变量的设置添加
+
+```
+
+void
+_mesa_glsl_initialize_variables(exec_list *instructions,
+				struct _mesa_glsl_parse_state *state)
+{
+   builtin_variable_generator gen(instructions, state);
+
+   gen.generate_constants();
+   gen.generate_uniforms();
+   gen.generate_special_vars();
+
+   gen.generate_varyings();
+
+   switch (state->stage) {
+   ...
+   case MESA_SHADER_GEOMETRY:
+      gen.generate_gs_special_vars();
+      break;
+   }
+}
+
+
+```
+
+
+###  gs 专有内建常量的添加
+
+```c
+
+void
+builtin_variable_generator::generate_constants()
+{
+
+    ...
+
+   if (state->has_geometry_shader()) {
+      add_const("gl_MaxVertexOutputComponents",
+                state->Const.MaxVertexOutputComponents);
+      add_const("gl_MaxGeometryInputComponents",
+                state->Const.MaxGeometryInputComponents);
+      add_const("gl_MaxGeometryOutputComponents",
+                state->Const.MaxGeometryOutputComponents);
+      add_const("gl_MaxFragmentInputComponents",
+                state->Const.MaxFragmentInputComponents);
+      add_const("gl_MaxGeometryTextureImageUnits",
+                state->Const.MaxGeometryTextureImageUnits);
+      add_const("gl_MaxGeometryOutputVertices",
+                state->Const.MaxGeometryOutputVertices);
+      add_const("gl_MaxGeometryTotalOutputComponents",
+                state->Const.MaxGeometryTotalOutputComponents);
+      add_const("gl_MaxGeometryUniformComponents",
+                state->Const.MaxGeometryUniformComponents);
+
+      /* Note: the GLSL 1.50-4.40 specs require
+       * gl_MaxGeometryVaryingComponents to be present, and to be at least 64.
+       * But they do not define what it means (and there does not appear to be
+       * any corresponding constant in the GL specs).  However,
+       * ARB_geometry_shader4 defines MAX_GEOMETRY_VARYING_COMPONENTS_ARB to
+       * be the maximum number of components available for use as geometry
+       * outputs.  So we assume this is a synonym for
+       * gl_MaxGeometryOutputComponents.
+       */
+      add_const("gl_MaxGeometryVaryingComponents",
+                state->Const.MaxGeometryOutputComponents);
+   }
+
+   if (state->is_version(420, 310)) {
+
+      if (state->has_geometry_shader()) {
+         add_const("gl_MaxGeometryAtomicCounterBuffers",
+                   state->Const.MaxGeometryAtomicCounterBuffers);
+      }
+   }
+
+
+   if (state->has_shader_image_load_store()) {
+
+      if (state->has_geometry_shader()) {
+         add_const("gl_MaxGeometryImageUniforms",
+                   state->Const.MaxGeometryImageUniforms);
+      }
+
+   }
+
+}
+```
+
+### gs 专有varying 的添加
+
+```
+void
+builtin_variable_generator::generate_varyings()
+{
+
+  if (state->stage == MESA_SHADER_GEOMETRY) {
+      const glsl_type *per_vertex_in_type =
+         this->per_vertex_in.construct_interface_instance();
+      add_variable("gl_in", array(per_vertex_in_type, 0),
+                   ir_var_shader_in, -1);
+   }
+  
+}
+
+```
+# gs 状态数据结构定义
+
+```
+
+/**
+ * Shader information needed by both gl_shader and gl_linked shader.
+ */
+struct gl_shader_info
+{
+    ...
+
+    /**
+     * GLSL 1.50 布局限定符导致的几何着色器状态。
+     */
+    struct {
+       GLint VerticesOut;
+       /**
+        * 0 - 未在着色器中声明调用次数，或
+        * 1 .. Const.MaxGeometryShaderInvocations
+        */
+       GLint Invocations;
+       /**
+        * GL_POINTS、GL_LINES、GL_LINES_ADJACENCY、GL_TRIANGLES，或
+        * GL_TRIANGLES_ADJACENCY，或如果在该着色器中未设置则为 PRIM_UNKNOWN。
+        */
+       GLenum16 InputType;
+       /**
+        * GL_POINTS、GL_LINE_STRIP 或 GL_TRIANGLE_STRIP，或如果在该着色器中未设置则为 PRIM_UNKNOWN。
+        */
+       GLenum16 OutputType;
+    } Geom;
+
+    ...
+}
+
+```
+
+# gs shader_program的生成
+
+```
+static struct gl_program *
+st_new_program(struct gl_context *ctx, GLenum target, GLuint id,
+               bool is_arb_asm)
+    ...
+    case GL_TESS_CONTROL_PROGRAM_NV:
+       case GL_TESS_EVALUATION_PROGRAM_NV:
+       case GL_GEOMETRY_PROGRAM_NV: {
+          struct st_common_program *prog = rzalloc(NULL,
+                                                   struct st_common_program);
+          return _mesa_init_gl_program(&prog->Base, target, id, is_arb_asm);
+       }
+
+```
+### gs 对inout layout限定符的处理
+
+```
+
+/**
+ * 执行几何着色器的 max_vertices 和 primitive type 布局限定符的交叉验证，
+ * 并将它们传播到链接的几何着色器和链接的着色器程序。
+ */
+static void
+link_gs_inout_layout_qualifiers(struct gl_shader_program *prog,
+                                struct gl_program *gl_prog,
+                                struct gl_shader **shader_list,
+                                unsigned num_shaders)
+{
+   /* 只有 GLSL 1.50+ 版本的几何着色器才定义了输入/输出布局限定符。*/
+   if (gl_prog->info.stage != MESA_SHADER_GEOMETRY ||
+       prog->data->Version < 150)
+      return;
+
+   int vertices_out = -1;
+
+   gl_prog->info.gs.invocations = 0;
+   gl_prog->info.gs.input_primitive = PRIM_UNKNOWN;
+   gl_prog->info.gs.output_primitive = PRIM_UNKNOWN;
+
+   /* 根据 GLSL 1.50 规范，第 46 页：
+    *
+    *     "程序中的所有几何着色器输出布局声明都必须声明相同的布局和
+    *      max_vertices 的值。程序中必须至少有一个几何着色器输出布局
+    *      声明，但不要求所有几何着色器（编译单元）都声明它。"
+    */
+
+   for (unsigned i = 0; i < num_shaders; i++) {
+      struct gl_shader *shader = shader_list[i];
+
+      if (shader->info.Geom.InputType != PRIM_UNKNOWN) {
+         if (gl_prog->info.gs.input_primitive != PRIM_UNKNOWN &&
+             gl_prog->info.gs.input_primitive !=
+             shader->info.Geom.InputType) {
+            linker_error(prog, "定义了冲突的几何着色器输入类型\n");
+            return;
+         }
+         gl_prog->info.gs.input_primitive = shader->info.Geom.InputType;
+      }
+
+      if (shader->info.Geom.OutputType != PRIM_UNKNOWN) {
+         if (gl_prog->info.gs.output_primitive != PRIM_UNKNOWN &&
+             gl_prog->info.gs.output_primitive !=
+             shader->info.Geom.OutputType) {
+            linker_error(prog, "定义了冲突的几何着色器输出类型\n");
+            return;
+         }
+         gl_prog->info.gs.output_primitive = shader->info.Geom.OutputType;
+      }
+
+      if (shader->info.Geom.VerticesOut != -1) {
+         if (vertices_out != -1 &&
+             vertices_out != shader->info.Geom.VerticesOut) {
+            linker_error(prog, "定义了冲突的几何着色器输出顶点数量 (%d 和 %d)\n",
+                         vertices_out, shader->info.Geom.VerticesOut);
+            return;
+         }
+         vertices_out = shader->info.Geom.VerticesOut;
+      }
+
+      if (shader->info.Geom.Invocations != 0) {
+         if (gl_prog->info.gs.invocations != 0 &&
+             gl_prog->info.gs.invocations !=
+             (unsigned) shader->info.Geom.Invocations) {
+            linker_error(prog, "定义了冲突的几何着色器调用次数 (%d 和 %d)\n",
+                         gl_prog->info.gs.invocations,
+                         shader->info.Geom.Invocations);
+            return;
+         }
+         gl_prog->info.gs.invocations = shader->info.Geom.Invocations;
+      }
+   }
+
+   /* 现在只执行阶段内 -> 阶段间的传播，因为我们已经知道我们在执行
+    * 正确类型的着色器程序来执行这个操作。
+    */
+   if (gl_prog->info.gs.input_primitive == PRIM_UNKNOWN) {
+      linker_error(prog,
+                   "几何着色器没有声明原始输入类型\n");
+      return;
+   }
+
+   if (gl_prog->info.gs.output_primitive == PRIM_UNKNOWN) {
+      linker_error(prog,
+                   "几何着色器没有声明原始输出类型\n");
+      return;
+   }
+
+   if (vertices_out == -1) {
+      linker_error(prog,
+                   "几何着色器没有声明 max_vertices\n");
+      return;
+   } else {
+      gl_prog->info.gs.vertices_out = vertices_out;
+   }
+
+   if (gl_prog->info.gs.invocations == 0)
+      gl_prog->info.gs.invocations = 1;
+}
+
+
+
+```
+###  gs 输入数组大小的设置
+
+```
+   /* Set the size of geometry shader input arrays */
+   if (linked->Stage == MESA_SHADER_GEOMETRY) {
+      unsigned num_vertices =
+         vertices_per_prim(gl_prog->info.gs.input_primitive);
+      array_resize_visitor input_resize_visitor(num_vertices, prog,
+                                                MESA_SHADER_GEOMETRY);
+      foreach_in_list(ir_instruction, ir, linked->ir) {
+         ir->accept(&input_resize_visitor);
+      }
+   }
+
+
+
+
+```
+
+gs使用一个st_common_program来保存信息
+      struct st_common_program *stgp = st_common_program(prog);
+
+# gs ureg program 的生成处理
+
+
+```
+st_program_string_notify( struct gl_context *ctx,
+                                           GLenum target,
+                                           struct gl_program *prog )
+
+    ...
+
+   else if (target == GL_GEOMETRY_PROGRAM_NV) {
+      struct st_common_program *stgp = st_common_program(prog);
+
+      st_release_basic_variants(st, stgp->Base.Target, &stgp->variants,
+                                &stgp->tgsi);
+      if (!st_translate_geometry_program(st, stgp))
+         return false;
+
+      if (st->gp == stgp)
+	 st->dirty |= stgp->affected_states;
+   }
+   ...
+}
+

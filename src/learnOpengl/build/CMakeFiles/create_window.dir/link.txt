@@ -1,0 +1,1 @@
+/usr/bin/c++ -g -rdynamic CMakeFiles/create_window.dir/src/glad.c.o CMakeFiles/create_window.dir/create_window.cpp.o -o create_window  -lglfw -lGL -lX11 -lpthread -lXrandr -lXi -ldl 

@@ -1,0 +1,1 @@
+/usr/bin/c++ -g -rdynamic CMakeFiles/colors.dir/src/glad.c.o CMakeFiles/colors.dir/colors.cpp.o -o colors  -lglfw -lGL -lX11 -lpthread -lXrandr -lXi -ldl 

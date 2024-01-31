@@ -14,8 +14,18 @@ https://epdf.tips/queue/advanced-linux-3d-graphics-programming.html
 https://theswissbay.ch/pdf/Gentoomen%20Library/Game%20Development/Programming/
 https://vdoc.pub/documents/linux-3d-graphics-programming-1ch3hiiu532g
 
+
 [Advanced_linux_3d_graphics_programming](https://nibmehub.com/opac-service/pdf/read/Advanced%20Linux%203D%20Graphics%20Programming.pdf)
+
 [Real-Time Rendering 4th Edition ](https://blog.csdn.net/qq_26625581/article/details/122054608)
 
 [Advanced_Graphics_Programming-EN](http://www.r-5.org/files/books/computers/algo-list/realtime-3d/Tom_McReynolds-Advanced_Graphics_Programming-EN.pdf)
+
+https://tex.stackexchange.com/questions/687540/latex-error-file-ctex-sty-not-found
+
+file:///home/shiji/Downloads/The_LaTeX_Graphics_Companion.pdf
+
+https://www.researchgate.net/publication/200541445_The_LaTeX_Companion_2nd_ed/link/57d7ee3108ae0c0081edd22f/download?_tp=eyJjb250ZXh0Ijp7ImZpcnN0UGFnZSI6InB1YmxpY2F0aW9uIiwicGFnZSI6InB1YmxpY2F0aW9uIiwicHJldmlvdXNQYWdlIjoiX2RpcmVjdCJ9fQ
+
+https://ask.latexstudio.net/ask/article/608.html
 

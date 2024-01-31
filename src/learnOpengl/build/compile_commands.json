@@ -1,22 +1,87 @@
 [
 {
   "directory": "/home/shiji/mesa3d/mesa3d/src/learnOpengl/build",
-  "command": "/usr/bin/cc  -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./include -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./learnopengl -g -o CMakeFiles/demo.dir/src/glad.c.o -c /home/shiji/mesa3d/mesa3d/src/learnOpengl/src/glad.c",
+  "command": "/usr/bin/cc  -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./include -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./learnopengl -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./include/glm -g -g -o CMakeFiles/create_window.dir/src/glad.c.o -c /home/shiji/mesa3d/mesa3d/src/learnOpengl/src/glad.c",
   "file": "/home/shiji/mesa3d/mesa3d/src/learnOpengl/src/glad.c"
 },
 {
   "directory": "/home/shiji/mesa3d/mesa3d/src/learnOpengl/build",
-  "command": "/usr/bin/c++  -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./include -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./learnopengl -g -o CMakeFiles/demo.dir/create_window.cpp.o -c /home/shiji/mesa3d/mesa3d/src/learnOpengl/create_window.cpp",
+  "command": "/usr/bin/c++  -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./include -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./learnopengl -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./include/glm -g -g -o CMakeFiles/create_window.dir/create_window.cpp.o -c /home/shiji/mesa3d/mesa3d/src/learnOpengl/create_window.cpp",
   "file": "/home/shiji/mesa3d/mesa3d/src/learnOpengl/create_window.cpp"
 },
 {
   "directory": "/home/shiji/mesa3d/mesa3d/src/learnOpengl/build",
-  "command": "/usr/bin/cc  -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./include -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./learnopengl -g -o CMakeFiles/texture.dir/src/glad.c.o -c /home/shiji/mesa3d/mesa3d/src/learnOpengl/src/glad.c",
+  "command": "/usr/bin/cc  -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./include -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./learnopengl -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./include/glm -g -g -o CMakeFiles/texture.dir/src/glad.c.o -c /home/shiji/mesa3d/mesa3d/src/learnOpengl/src/glad.c",
   "file": "/home/shiji/mesa3d/mesa3d/src/learnOpengl/src/glad.c"
 },
 {
   "directory": "/home/shiji/mesa3d/mesa3d/src/learnOpengl/build",
-  "command": "/usr/bin/c++  -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./include -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./learnopengl -g -o CMakeFiles/texture.dir/texture.cpp.o -c /home/shiji/mesa3d/mesa3d/src/learnOpengl/texture.cpp",
+  "command": "/usr/bin/c++  -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./include -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./learnopengl -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./include/glm -g -g -o CMakeFiles/texture.dir/texture.cpp.o -c /home/shiji/mesa3d/mesa3d/src/learnOpengl/texture.cpp",
   "file": "/home/shiji/mesa3d/mesa3d/src/learnOpengl/texture.cpp"
+},
+{
+  "directory": "/home/shiji/mesa3d/mesa3d/src/learnOpengl/build",
+  "command": "/usr/bin/cc  -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./include -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./learnopengl -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./include/glm -g -o CMakeFiles/texture_comb.dir/src/glad.c.o -c /home/shiji/mesa3d/mesa3d/src/learnOpengl/src/glad.c",
+  "file": "/home/shiji/mesa3d/mesa3d/src/learnOpengl/src/glad.c"
+},
+{
+  "directory": "/home/shiji/mesa3d/mesa3d/src/learnOpengl/build",
+  "command": "/usr/bin/c++  -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./include -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./learnopengl -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./include/glm -g -o CMakeFiles/texture_comb.dir/textures_combined.cpp.o -c /home/shiji/mesa3d/mesa3d/src/learnOpengl/textures_combined.cpp",
+  "file": "/home/shiji/mesa3d/mesa3d/src/learnOpengl/textures_combined.cpp"
+},
+{
+  "directory": "/home/shiji/mesa3d/mesa3d/src/learnOpengl/build",
+  "command": "/usr/bin/cc  -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./include -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./learnopengl -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./include/glm -g -o CMakeFiles/colors.dir/src/glad.c.o -c /home/shiji/mesa3d/mesa3d/src/learnOpengl/src/glad.c",
+  "file": "/home/shiji/mesa3d/mesa3d/src/learnOpengl/src/glad.c"
+},
+{
+  "directory": "/home/shiji/mesa3d/mesa3d/src/learnOpengl/build",
+  "command": "/usr/bin/c++  -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./include -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./learnopengl -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./include/glm -g -o CMakeFiles/colors.dir/colors.cpp.o -c /home/shiji/mesa3d/mesa3d/src/learnOpengl/colors.cpp",
+  "file": "/home/shiji/mesa3d/mesa3d/src/learnOpengl/colors.cpp"
+},
+{
+  "directory": "/home/shiji/mesa3d/mesa3d/src/learnOpengl/build",
+  "command": "/usr/bin/cc  -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./include -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./learnopengl -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./include/glm -g -o CMakeFiles/basic_light_specular.dir/src/glad.c.o -c /home/shiji/mesa3d/mesa3d/src/learnOpengl/src/glad.c",
+  "file": "/home/shiji/mesa3d/mesa3d/src/learnOpengl/src/glad.c"
+},
+{
+  "directory": "/home/shiji/mesa3d/mesa3d/src/learnOpengl/build",
+  "command": "/usr/bin/c++  -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./include -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./learnopengl -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./include/glm -g -o CMakeFiles/basic_light_specular.dir/basic_light_specular.cpp.o -c /home/shiji/mesa3d/mesa3d/src/learnOpengl/basic_light_specular.cpp",
+  "file": "/home/shiji/mesa3d/mesa3d/src/learnOpengl/basic_light_specular.cpp"
+},
+{
+  "directory": "/home/shiji/mesa3d/mesa3d/src/learnOpengl/build",
+  "command": "/usr/bin/cc  -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./include -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./learnopengl -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./include/glm -g -o CMakeFiles/advanced_glsl_ubo.dir/src/glad.c.o -c /home/shiji/mesa3d/mesa3d/src/learnOpengl/src/glad.c",
+  "file": "/home/shiji/mesa3d/mesa3d/src/learnOpengl/src/glad.c"
+},
+{
+  "directory": "/home/shiji/mesa3d/mesa3d/src/learnOpengl/build",
+  "command": "/usr/bin/c++  -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./include -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./learnopengl -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./include/glm -g -o CMakeFiles/advanced_glsl_ubo.dir/advanced_glsl_ubo.cpp.o -c /home/shiji/mesa3d/mesa3d/src/learnOpengl/advanced_glsl_ubo.cpp",
+  "file": "/home/shiji/mesa3d/mesa3d/src/learnOpengl/advanced_glsl_ubo.cpp"
+},
+{
+  "directory": "/home/shiji/mesa3d/mesa3d/src/learnOpengl/build",
+  "command": "/usr/bin/cc  -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./include -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./learnopengl -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./include/glm -g -o CMakeFiles/geometry_shader_houses.dir/src/glad.c.o -c /home/shiji/mesa3d/mesa3d/src/learnOpengl/src/glad.c",
+  "file": "/home/shiji/mesa3d/mesa3d/src/learnOpengl/src/glad.c"
+},
+{
+  "directory": "/home/shiji/mesa3d/mesa3d/src/learnOpengl/build",
+  "command": "/usr/bin/c++  -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./include -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./learnopengl -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./include/glm -g -o CMakeFiles/geometry_shader_houses.dir/geometry_shader_houses.cpp.o -c /home/shiji/mesa3d/mesa3d/src/learnOpengl/geometry_shader_houses.cpp",
+  "file": "/home/shiji/mesa3d/mesa3d/src/learnOpengl/geometry_shader_houses.cpp"
+},
+{
+  "directory": "/home/shiji/mesa3d/mesa3d/src/learnOpengl/build",
+  "command": "/usr/bin/cc  -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./include -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./learnopengl -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./include/glm -g -o CMakeFiles/shaders_interpolation.dir/src/glad.c.o -c /home/shiji/mesa3d/mesa3d/src/learnOpengl/src/glad.c",
+  "file": "/home/shiji/mesa3d/mesa3d/src/learnOpengl/src/glad.c"
+},
+{
+  "directory": "/home/shiji/mesa3d/mesa3d/src/learnOpengl/build",
+  "command": "/usr/bin/c++  -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./include -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./learnopengl -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./include/glm -g -o CMakeFiles/shaders_interpolation.dir/shaders_interpolation.cpp.o -c /home/shiji/mesa3d/mesa3d/src/learnOpengl/shaders_interpolation.cpp",
+  "file": "/home/shiji/mesa3d/mesa3d/src/learnOpengl/shaders_interpolation.cpp"
+},
+{
+  "directory": "/home/shiji/mesa3d/mesa3d/src/learnOpengl/build",
+  "command": "/usr/bin/c++  -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./include -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./learnopengl -I/home/shiji/mesa3d/mesa3d/src/learnOpengl/./include/glm -g -o CMakeFiles/gpt_transform_feedback.dir/gpt_transform_feedback.cpp.o -c /home/shiji/mesa3d/mesa3d/src/learnOpengl/gpt_transform_feedback.cpp",
+  "file": "/home/shiji/mesa3d/mesa3d/src/learnOpengl/gpt_transform_feedback.cpp"
 }
 ]

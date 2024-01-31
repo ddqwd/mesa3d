@@ -1,4 +1,11 @@
-/home/shiji/mesa3d/mesa3d/src/learnOpengl/build/CMakeFiles/demo.dir
+/home/shiji/mesa3d/mesa3d/src/learnOpengl/build/CMakeFiles/create_window.dir
 /home/shiji/mesa3d/mesa3d/src/learnOpengl/build/CMakeFiles/texture.dir
+/home/shiji/mesa3d/mesa3d/src/learnOpengl/build/CMakeFiles/texture_comb.dir
+/home/shiji/mesa3d/mesa3d/src/learnOpengl/build/CMakeFiles/colors.dir
+/home/shiji/mesa3d/mesa3d/src/learnOpengl/build/CMakeFiles/basic_light_specular.dir
+/home/shiji/mesa3d/mesa3d/src/learnOpengl/build/CMakeFiles/advanced_glsl_ubo.dir
+/home/shiji/mesa3d/mesa3d/src/learnOpengl/build/CMakeFiles/geometry_shader_houses.dir
+/home/shiji/mesa3d/mesa3d/src/learnOpengl/build/CMakeFiles/shaders_interpolation.dir
+/home/shiji/mesa3d/mesa3d/src/learnOpengl/build/CMakeFiles/gpt_transform_feedback.dir
 /home/shiji/mesa3d/mesa3d/src/learnOpengl/build/CMakeFiles/edit_cache.dir
 /home/shiji/mesa3d/mesa3d/src/learnOpengl/build/CMakeFiles/rebuild_cache.dir

@@ -1,0 +1,1 @@
+/usr/bin/c++ -g -rdynamic CMakeFiles/texture_comb.dir/src/glad.c.o CMakeFiles/texture_comb.dir/textures_combined.cpp.o -o texture_comb  -g -lglfw -lGL -lX11 -lpthread -lXrandr -lXi -ldl 

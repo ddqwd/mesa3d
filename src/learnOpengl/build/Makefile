@@ -117,17 +117,17 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named demo
+# Target rules for targets named create_window
 
 # Build rule for target.
-demo: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 demo
-.PHONY : demo
+create_window: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 create_window
+.PHONY : create_window
 
 # fast build rule for target.
-demo/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/demo.dir/build.make CMakeFiles/demo.dir/build
-.PHONY : demo/fast
+create_window/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/create_window.dir/build.make CMakeFiles/create_window.dir/build
+.PHONY : create_window/fast
 
 #=============================================================================
 # Target rules for targets named texture
@@ -142,12 +142,175 @@ texture/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/texture.dir/build.make CMakeFiles/texture.dir/build
 .PHONY : texture/fast
 
+#=============================================================================
+# Target rules for targets named texture_comb
+
+# Build rule for target.
+texture_comb: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 texture_comb
+.PHONY : texture_comb
+
+# fast build rule for target.
+texture_comb/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/texture_comb.dir/build.make CMakeFiles/texture_comb.dir/build
+.PHONY : texture_comb/fast
+
+#=============================================================================
+# Target rules for targets named colors
+
+# Build rule for target.
+colors: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 colors
+.PHONY : colors
+
+# fast build rule for target.
+colors/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/colors.dir/build.make CMakeFiles/colors.dir/build
+.PHONY : colors/fast
+
+#=============================================================================
+# Target rules for targets named basic_light_specular
+
+# Build rule for target.
+basic_light_specular: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 basic_light_specular
+.PHONY : basic_light_specular
+
+# fast build rule for target.
+basic_light_specular/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/basic_light_specular.dir/build.make CMakeFiles/basic_light_specular.dir/build
+.PHONY : basic_light_specular/fast
+
+#=============================================================================
+# Target rules for targets named advanced_glsl_ubo
+
+# Build rule for target.
+advanced_glsl_ubo: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 advanced_glsl_ubo
+.PHONY : advanced_glsl_ubo
+
+# fast build rule for target.
+advanced_glsl_ubo/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/advanced_glsl_ubo.dir/build.make CMakeFiles/advanced_glsl_ubo.dir/build
+.PHONY : advanced_glsl_ubo/fast
+
+#=============================================================================
+# Target rules for targets named geometry_shader_houses
+
+# Build rule for target.
+geometry_shader_houses: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 geometry_shader_houses
+.PHONY : geometry_shader_houses
+
+# fast build rule for target.
+geometry_shader_houses/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/geometry_shader_houses.dir/build.make CMakeFiles/geometry_shader_houses.dir/build
+.PHONY : geometry_shader_houses/fast
+
+#=============================================================================
+# Target rules for targets named shaders_interpolation
+
+# Build rule for target.
+shaders_interpolation: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 shaders_interpolation
+.PHONY : shaders_interpolation
+
+# fast build rule for target.
+shaders_interpolation/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shaders_interpolation.dir/build.make CMakeFiles/shaders_interpolation.dir/build
+.PHONY : shaders_interpolation/fast
+
+#=============================================================================
+# Target rules for targets named gpt_transform_feedback
+
+# Build rule for target.
+gpt_transform_feedback: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 gpt_transform_feedback
+.PHONY : gpt_transform_feedback
+
+# fast build rule for target.
+gpt_transform_feedback/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gpt_transform_feedback.dir/build.make CMakeFiles/gpt_transform_feedback.dir/build
+.PHONY : gpt_transform_feedback/fast
+
+advanced_glsl_ubo.o: advanced_glsl_ubo.cpp.o
+.PHONY : advanced_glsl_ubo.o
+
+# target to build an object file
+advanced_glsl_ubo.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/advanced_glsl_ubo.dir/build.make CMakeFiles/advanced_glsl_ubo.dir/advanced_glsl_ubo.cpp.o
+.PHONY : advanced_glsl_ubo.cpp.o
+
+advanced_glsl_ubo.i: advanced_glsl_ubo.cpp.i
+.PHONY : advanced_glsl_ubo.i
+
+# target to preprocess a source file
+advanced_glsl_ubo.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/advanced_glsl_ubo.dir/build.make CMakeFiles/advanced_glsl_ubo.dir/advanced_glsl_ubo.cpp.i
+.PHONY : advanced_glsl_ubo.cpp.i
+
+advanced_glsl_ubo.s: advanced_glsl_ubo.cpp.s
+.PHONY : advanced_glsl_ubo.s
+
+# target to generate assembly for a file
+advanced_glsl_ubo.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/advanced_glsl_ubo.dir/build.make CMakeFiles/advanced_glsl_ubo.dir/advanced_glsl_ubo.cpp.s
+.PHONY : advanced_glsl_ubo.cpp.s
+
+basic_light_specular.o: basic_light_specular.cpp.o
+.PHONY : basic_light_specular.o
+
+# target to build an object file
+basic_light_specular.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/basic_light_specular.dir/build.make CMakeFiles/basic_light_specular.dir/basic_light_specular.cpp.o
+.PHONY : basic_light_specular.cpp.o
+
+basic_light_specular.i: basic_light_specular.cpp.i
+.PHONY : basic_light_specular.i
+
+# target to preprocess a source file
+basic_light_specular.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/basic_light_specular.dir/build.make CMakeFiles/basic_light_specular.dir/basic_light_specular.cpp.i
+.PHONY : basic_light_specular.cpp.i
+
+basic_light_specular.s: basic_light_specular.cpp.s
+.PHONY : basic_light_specular.s
+
+# target to generate assembly for a file
+basic_light_specular.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/basic_light_specular.dir/build.make CMakeFiles/basic_light_specular.dir/basic_light_specular.cpp.s
+.PHONY : basic_light_specular.cpp.s
+
+colors.o: colors.cpp.o
+.PHONY : colors.o
+
+# target to build an object file
+colors.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/colors.dir/build.make CMakeFiles/colors.dir/colors.cpp.o
+.PHONY : colors.cpp.o
+
+colors.i: colors.cpp.i
+.PHONY : colors.i
+
+# target to preprocess a source file
+colors.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/colors.dir/build.make CMakeFiles/colors.dir/colors.cpp.i
+.PHONY : colors.cpp.i
+
+colors.s: colors.cpp.s
+.PHONY : colors.s
+
+# target to generate assembly for a file
+colors.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/colors.dir/build.make CMakeFiles/colors.dir/colors.cpp.s
+.PHONY : colors.cpp.s
+
 create_window.o: create_window.cpp.o
 .PHONY : create_window.o
 
 # target to build an object file
 create_window.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/demo.dir/build.make CMakeFiles/demo.dir/create_window.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/create_window.dir/build.make CMakeFiles/create_window.dir/create_window.cpp.o
 .PHONY : create_window.cpp.o
 
 create_window.i: create_window.cpp.i
@@ -155,7 +318,7 @@ create_window.i: create_window.cpp.i
 
 # target to preprocess a source file
 create_window.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/demo.dir/build.make CMakeFiles/demo.dir/create_window.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/create_window.dir/build.make CMakeFiles/create_window.dir/create_window.cpp.i
 .PHONY : create_window.cpp.i
 
 create_window.s: create_window.cpp.s
@@ -163,16 +326,94 @@ create_window.s: create_window.cpp.s
 
 # target to generate assembly for a file
 create_window.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/demo.dir/build.make CMakeFiles/demo.dir/create_window.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/create_window.dir/build.make CMakeFiles/create_window.dir/create_window.cpp.s
 .PHONY : create_window.cpp.s
+
+geometry_shader_houses.o: geometry_shader_houses.cpp.o
+.PHONY : geometry_shader_houses.o
+
+# target to build an object file
+geometry_shader_houses.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/geometry_shader_houses.dir/build.make CMakeFiles/geometry_shader_houses.dir/geometry_shader_houses.cpp.o
+.PHONY : geometry_shader_houses.cpp.o
+
+geometry_shader_houses.i: geometry_shader_houses.cpp.i
+.PHONY : geometry_shader_houses.i
+
+# target to preprocess a source file
+geometry_shader_houses.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/geometry_shader_houses.dir/build.make CMakeFiles/geometry_shader_houses.dir/geometry_shader_houses.cpp.i
+.PHONY : geometry_shader_houses.cpp.i
+
+geometry_shader_houses.s: geometry_shader_houses.cpp.s
+.PHONY : geometry_shader_houses.s
+
+# target to generate assembly for a file
+geometry_shader_houses.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/geometry_shader_houses.dir/build.make CMakeFiles/geometry_shader_houses.dir/geometry_shader_houses.cpp.s
+.PHONY : geometry_shader_houses.cpp.s
+
+gpt_transform_feedback.o: gpt_transform_feedback.cpp.o
+.PHONY : gpt_transform_feedback.o
+
+# target to build an object file
+gpt_transform_feedback.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gpt_transform_feedback.dir/build.make CMakeFiles/gpt_transform_feedback.dir/gpt_transform_feedback.cpp.o
+.PHONY : gpt_transform_feedback.cpp.o
+
+gpt_transform_feedback.i: gpt_transform_feedback.cpp.i
+.PHONY : gpt_transform_feedback.i
+
+# target to preprocess a source file
+gpt_transform_feedback.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gpt_transform_feedback.dir/build.make CMakeFiles/gpt_transform_feedback.dir/gpt_transform_feedback.cpp.i
+.PHONY : gpt_transform_feedback.cpp.i
+
+gpt_transform_feedback.s: gpt_transform_feedback.cpp.s
+.PHONY : gpt_transform_feedback.s
+
+# target to generate assembly for a file
+gpt_transform_feedback.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gpt_transform_feedback.dir/build.make CMakeFiles/gpt_transform_feedback.dir/gpt_transform_feedback.cpp.s
+.PHONY : gpt_transform_feedback.cpp.s
+
+shaders_interpolation.o: shaders_interpolation.cpp.o
+.PHONY : shaders_interpolation.o
+
+# target to build an object file
+shaders_interpolation.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shaders_interpolation.dir/build.make CMakeFiles/shaders_interpolation.dir/shaders_interpolation.cpp.o
+.PHONY : shaders_interpolation.cpp.o
+
+shaders_interpolation.i: shaders_interpolation.cpp.i
+.PHONY : shaders_interpolation.i
+
+# target to preprocess a source file
+shaders_interpolation.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shaders_interpolation.dir/build.make CMakeFiles/shaders_interpolation.dir/shaders_interpolation.cpp.i
+.PHONY : shaders_interpolation.cpp.i
+
+shaders_interpolation.s: shaders_interpolation.cpp.s
+.PHONY : shaders_interpolation.s
+
+# target to generate assembly for a file
+shaders_interpolation.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shaders_interpolation.dir/build.make CMakeFiles/shaders_interpolation.dir/shaders_interpolation.cpp.s
+.PHONY : shaders_interpolation.cpp.s
 
 src/glad.o: src/glad.c.o
 .PHONY : src/glad.o
 
 # target to build an object file
 src/glad.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/demo.dir/build.make CMakeFiles/demo.dir/src/glad.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/create_window.dir/build.make CMakeFiles/create_window.dir/src/glad.c.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/texture.dir/build.make CMakeFiles/texture.dir/src/glad.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/texture_comb.dir/build.make CMakeFiles/texture_comb.dir/src/glad.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/colors.dir/build.make CMakeFiles/colors.dir/src/glad.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/basic_light_specular.dir/build.make CMakeFiles/basic_light_specular.dir/src/glad.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/advanced_glsl_ubo.dir/build.make CMakeFiles/advanced_glsl_ubo.dir/src/glad.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/geometry_shader_houses.dir/build.make CMakeFiles/geometry_shader_houses.dir/src/glad.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shaders_interpolation.dir/build.make CMakeFiles/shaders_interpolation.dir/src/glad.c.o
 .PHONY : src/glad.c.o
 
 src/glad.i: src/glad.c.i
@@ -180,8 +421,14 @@ src/glad.i: src/glad.c.i
 
 # target to preprocess a source file
 src/glad.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/demo.dir/build.make CMakeFiles/demo.dir/src/glad.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/create_window.dir/build.make CMakeFiles/create_window.dir/src/glad.c.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/texture.dir/build.make CMakeFiles/texture.dir/src/glad.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/texture_comb.dir/build.make CMakeFiles/texture_comb.dir/src/glad.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/colors.dir/build.make CMakeFiles/colors.dir/src/glad.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/basic_light_specular.dir/build.make CMakeFiles/basic_light_specular.dir/src/glad.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/advanced_glsl_ubo.dir/build.make CMakeFiles/advanced_glsl_ubo.dir/src/glad.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/geometry_shader_houses.dir/build.make CMakeFiles/geometry_shader_houses.dir/src/glad.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shaders_interpolation.dir/build.make CMakeFiles/shaders_interpolation.dir/src/glad.c.i
 .PHONY : src/glad.c.i
 
 src/glad.s: src/glad.c.s
@@ -189,8 +436,14 @@ src/glad.s: src/glad.c.s
 
 # target to generate assembly for a file
 src/glad.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/demo.dir/build.make CMakeFiles/demo.dir/src/glad.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/create_window.dir/build.make CMakeFiles/create_window.dir/src/glad.c.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/texture.dir/build.make CMakeFiles/texture.dir/src/glad.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/texture_comb.dir/build.make CMakeFiles/texture_comb.dir/src/glad.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/colors.dir/build.make CMakeFiles/colors.dir/src/glad.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/basic_light_specular.dir/build.make CMakeFiles/basic_light_specular.dir/src/glad.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/advanced_glsl_ubo.dir/build.make CMakeFiles/advanced_glsl_ubo.dir/src/glad.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/geometry_shader_houses.dir/build.make CMakeFiles/geometry_shader_houses.dir/src/glad.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shaders_interpolation.dir/build.make CMakeFiles/shaders_interpolation.dir/src/glad.c.s
 .PHONY : src/glad.c.s
 
 texture.o: texture.cpp.o
@@ -217,6 +470,30 @@ texture.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/texture.dir/build.make CMakeFiles/texture.dir/texture.cpp.s
 .PHONY : texture.cpp.s
 
+textures_combined.o: textures_combined.cpp.o
+.PHONY : textures_combined.o
+
+# target to build an object file
+textures_combined.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/texture_comb.dir/build.make CMakeFiles/texture_comb.dir/textures_combined.cpp.o
+.PHONY : textures_combined.cpp.o
+
+textures_combined.i: textures_combined.cpp.i
+.PHONY : textures_combined.i
+
+# target to preprocess a source file
+textures_combined.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/texture_comb.dir/build.make CMakeFiles/texture_comb.dir/textures_combined.cpp.i
+.PHONY : textures_combined.cpp.i
+
+textures_combined.s: textures_combined.cpp.s
+.PHONY : textures_combined.s
+
+# target to generate assembly for a file
+textures_combined.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/texture_comb.dir/build.make CMakeFiles/texture_comb.dir/textures_combined.cpp.s
+.PHONY : textures_combined.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -225,17 +502,45 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... demo"
+	@echo "... advanced_glsl_ubo"
+	@echo "... basic_light_specular"
+	@echo "... colors"
+	@echo "... create_window"
+	@echo "... geometry_shader_houses"
+	@echo "... gpt_transform_feedback"
+	@echo "... shaders_interpolation"
 	@echo "... texture"
+	@echo "... texture_comb"
+	@echo "... advanced_glsl_ubo.o"
+	@echo "... advanced_glsl_ubo.i"
+	@echo "... advanced_glsl_ubo.s"
+	@echo "... basic_light_specular.o"
+	@echo "... basic_light_specular.i"
+	@echo "... basic_light_specular.s"
+	@echo "... colors.o"
+	@echo "... colors.i"
+	@echo "... colors.s"
 	@echo "... create_window.o"
 	@echo "... create_window.i"
 	@echo "... create_window.s"
+	@echo "... geometry_shader_houses.o"
+	@echo "... geometry_shader_houses.i"
+	@echo "... geometry_shader_houses.s"
+	@echo "... gpt_transform_feedback.o"
+	@echo "... gpt_transform_feedback.i"
+	@echo "... gpt_transform_feedback.s"
+	@echo "... shaders_interpolation.o"
+	@echo "... shaders_interpolation.i"
+	@echo "... shaders_interpolation.s"
 	@echo "... src/glad.o"
 	@echo "... src/glad.i"
 	@echo "... src/glad.s"
 	@echo "... texture.o"
 	@echo "... texture.i"
 	@echo "... texture.s"
+	@echo "... textures_combined.o"
+	@echo "... textures_combined.i"
+	@echo "... textures_combined.s"
 .PHONY : help
 
 

@@ -63,8 +63,15 @@ CMAKE_BINARY_DIR = /home/shiji/mesa3d/mesa3d/src/learnOpengl/build
 # Directory level rules for the build root directory
 
 # The main recursive "all" target.
-all: CMakeFiles/demo.dir/all
+all: CMakeFiles/create_window.dir/all
 all: CMakeFiles/texture.dir/all
+all: CMakeFiles/texture_comb.dir/all
+all: CMakeFiles/colors.dir/all
+all: CMakeFiles/basic_light_specular.dir/all
+all: CMakeFiles/advanced_glsl_ubo.dir/all
+all: CMakeFiles/geometry_shader_houses.dir/all
+all: CMakeFiles/shaders_interpolation.dir/all
+all: CMakeFiles/gpt_transform_feedback.dir/all
 .PHONY : all
 
 # The main recursive "preinstall" target.
@@ -72,35 +79,42 @@ preinstall:
 .PHONY : preinstall
 
 # The main recursive "clean" target.
-clean: CMakeFiles/demo.dir/clean
+clean: CMakeFiles/create_window.dir/clean
 clean: CMakeFiles/texture.dir/clean
+clean: CMakeFiles/texture_comb.dir/clean
+clean: CMakeFiles/colors.dir/clean
+clean: CMakeFiles/basic_light_specular.dir/clean
+clean: CMakeFiles/advanced_glsl_ubo.dir/clean
+clean: CMakeFiles/geometry_shader_houses.dir/clean
+clean: CMakeFiles/shaders_interpolation.dir/clean
+clean: CMakeFiles/gpt_transform_feedback.dir/clean
 .PHONY : clean
 
 #=============================================================================
-# Target rules for target CMakeFiles/demo.dir
+# Target rules for target CMakeFiles/create_window.dir
 
 # All Build rule for target.
-CMakeFiles/demo.dir/all:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/demo.dir/build.make CMakeFiles/demo.dir/depend
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/demo.dir/build.make CMakeFiles/demo.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/shiji/mesa3d/mesa3d/src/learnOpengl/build/CMakeFiles --progress-num=1,2,3 "Built target demo"
-.PHONY : CMakeFiles/demo.dir/all
+CMakeFiles/create_window.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/create_window.dir/build.make CMakeFiles/create_window.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/create_window.dir/build.make CMakeFiles/create_window.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/shiji/mesa3d/mesa3d/src/learnOpengl/build/CMakeFiles --progress-num=10,11,12 "Built target create_window"
+.PHONY : CMakeFiles/create_window.dir/all
 
 # Build rule for subdir invocation for target.
-CMakeFiles/demo.dir/rule: cmake_check_build_system
+CMakeFiles/create_window.dir/rule: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/shiji/mesa3d/mesa3d/src/learnOpengl/build/CMakeFiles 3
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/demo.dir/all
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/create_window.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/shiji/mesa3d/mesa3d/src/learnOpengl/build/CMakeFiles 0
-.PHONY : CMakeFiles/demo.dir/rule
+.PHONY : CMakeFiles/create_window.dir/rule
 
 # Convenience name for target.
-demo: CMakeFiles/demo.dir/rule
-.PHONY : demo
+create_window: CMakeFiles/create_window.dir/rule
+.PHONY : create_window
 
 # clean rule for target.
-CMakeFiles/demo.dir/clean:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/demo.dir/build.make CMakeFiles/demo.dir/clean
-.PHONY : CMakeFiles/demo.dir/clean
+CMakeFiles/create_window.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/create_window.dir/build.make CMakeFiles/create_window.dir/clean
+.PHONY : CMakeFiles/create_window.dir/clean
 
 #=============================================================================
 # Target rules for target CMakeFiles/texture.dir
@@ -109,7 +123,7 @@ CMakeFiles/demo.dir/clean:
 CMakeFiles/texture.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/texture.dir/build.make CMakeFiles/texture.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/texture.dir/build.make CMakeFiles/texture.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/shiji/mesa3d/mesa3d/src/learnOpengl/build/CMakeFiles --progress-num=4,5,6 "Built target texture"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/shiji/mesa3d/mesa3d/src/learnOpengl/build/CMakeFiles --progress-num=21,22,23 "Built target texture"
 .PHONY : CMakeFiles/texture.dir/all
 
 # Build rule for subdir invocation for target.
@@ -127,6 +141,188 @@ texture: CMakeFiles/texture.dir/rule
 CMakeFiles/texture.dir/clean:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/texture.dir/build.make CMakeFiles/texture.dir/clean
 .PHONY : CMakeFiles/texture.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/texture_comb.dir
+
+# All Build rule for target.
+CMakeFiles/texture_comb.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/texture_comb.dir/build.make CMakeFiles/texture_comb.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/texture_comb.dir/build.make CMakeFiles/texture_comb.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/shiji/mesa3d/mesa3d/src/learnOpengl/build/CMakeFiles --progress-num=24,25,26 "Built target texture_comb"
+.PHONY : CMakeFiles/texture_comb.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/texture_comb.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/shiji/mesa3d/mesa3d/src/learnOpengl/build/CMakeFiles 3
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/texture_comb.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/shiji/mesa3d/mesa3d/src/learnOpengl/build/CMakeFiles 0
+.PHONY : CMakeFiles/texture_comb.dir/rule
+
+# Convenience name for target.
+texture_comb: CMakeFiles/texture_comb.dir/rule
+.PHONY : texture_comb
+
+# clean rule for target.
+CMakeFiles/texture_comb.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/texture_comb.dir/build.make CMakeFiles/texture_comb.dir/clean
+.PHONY : CMakeFiles/texture_comb.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/colors.dir
+
+# All Build rule for target.
+CMakeFiles/colors.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/colors.dir/build.make CMakeFiles/colors.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/colors.dir/build.make CMakeFiles/colors.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/shiji/mesa3d/mesa3d/src/learnOpengl/build/CMakeFiles --progress-num=7,8,9 "Built target colors"
+.PHONY : CMakeFiles/colors.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/colors.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/shiji/mesa3d/mesa3d/src/learnOpengl/build/CMakeFiles 3
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/colors.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/shiji/mesa3d/mesa3d/src/learnOpengl/build/CMakeFiles 0
+.PHONY : CMakeFiles/colors.dir/rule
+
+# Convenience name for target.
+colors: CMakeFiles/colors.dir/rule
+.PHONY : colors
+
+# clean rule for target.
+CMakeFiles/colors.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/colors.dir/build.make CMakeFiles/colors.dir/clean
+.PHONY : CMakeFiles/colors.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/basic_light_specular.dir
+
+# All Build rule for target.
+CMakeFiles/basic_light_specular.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/basic_light_specular.dir/build.make CMakeFiles/basic_light_specular.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/basic_light_specular.dir/build.make CMakeFiles/basic_light_specular.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/shiji/mesa3d/mesa3d/src/learnOpengl/build/CMakeFiles --progress-num=4,5,6 "Built target basic_light_specular"
+.PHONY : CMakeFiles/basic_light_specular.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/basic_light_specular.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/shiji/mesa3d/mesa3d/src/learnOpengl/build/CMakeFiles 3
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/basic_light_specular.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/shiji/mesa3d/mesa3d/src/learnOpengl/build/CMakeFiles 0
+.PHONY : CMakeFiles/basic_light_specular.dir/rule
+
+# Convenience name for target.
+basic_light_specular: CMakeFiles/basic_light_specular.dir/rule
+.PHONY : basic_light_specular
+
+# clean rule for target.
+CMakeFiles/basic_light_specular.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/basic_light_specular.dir/build.make CMakeFiles/basic_light_specular.dir/clean
+.PHONY : CMakeFiles/basic_light_specular.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/advanced_glsl_ubo.dir
+
+# All Build rule for target.
+CMakeFiles/advanced_glsl_ubo.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/advanced_glsl_ubo.dir/build.make CMakeFiles/advanced_glsl_ubo.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/advanced_glsl_ubo.dir/build.make CMakeFiles/advanced_glsl_ubo.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/shiji/mesa3d/mesa3d/src/learnOpengl/build/CMakeFiles --progress-num=1,2,3 "Built target advanced_glsl_ubo"
+.PHONY : CMakeFiles/advanced_glsl_ubo.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/advanced_glsl_ubo.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/shiji/mesa3d/mesa3d/src/learnOpengl/build/CMakeFiles 3
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/advanced_glsl_ubo.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/shiji/mesa3d/mesa3d/src/learnOpengl/build/CMakeFiles 0
+.PHONY : CMakeFiles/advanced_glsl_ubo.dir/rule
+
+# Convenience name for target.
+advanced_glsl_ubo: CMakeFiles/advanced_glsl_ubo.dir/rule
+.PHONY : advanced_glsl_ubo
+
+# clean rule for target.
+CMakeFiles/advanced_glsl_ubo.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/advanced_glsl_ubo.dir/build.make CMakeFiles/advanced_glsl_ubo.dir/clean
+.PHONY : CMakeFiles/advanced_glsl_ubo.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/geometry_shader_houses.dir
+
+# All Build rule for target.
+CMakeFiles/geometry_shader_houses.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/geometry_shader_houses.dir/build.make CMakeFiles/geometry_shader_houses.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/geometry_shader_houses.dir/build.make CMakeFiles/geometry_shader_houses.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/shiji/mesa3d/mesa3d/src/learnOpengl/build/CMakeFiles --progress-num=13,14,15 "Built target geometry_shader_houses"
+.PHONY : CMakeFiles/geometry_shader_houses.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/geometry_shader_houses.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/shiji/mesa3d/mesa3d/src/learnOpengl/build/CMakeFiles 3
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/geometry_shader_houses.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/shiji/mesa3d/mesa3d/src/learnOpengl/build/CMakeFiles 0
+.PHONY : CMakeFiles/geometry_shader_houses.dir/rule
+
+# Convenience name for target.
+geometry_shader_houses: CMakeFiles/geometry_shader_houses.dir/rule
+.PHONY : geometry_shader_houses
+
+# clean rule for target.
+CMakeFiles/geometry_shader_houses.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/geometry_shader_houses.dir/build.make CMakeFiles/geometry_shader_houses.dir/clean
+.PHONY : CMakeFiles/geometry_shader_houses.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/shaders_interpolation.dir
+
+# All Build rule for target.
+CMakeFiles/shaders_interpolation.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shaders_interpolation.dir/build.make CMakeFiles/shaders_interpolation.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shaders_interpolation.dir/build.make CMakeFiles/shaders_interpolation.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/shiji/mesa3d/mesa3d/src/learnOpengl/build/CMakeFiles --progress-num=18,19,20 "Built target shaders_interpolation"
+.PHONY : CMakeFiles/shaders_interpolation.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/shaders_interpolation.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/shiji/mesa3d/mesa3d/src/learnOpengl/build/CMakeFiles 3
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/shaders_interpolation.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/shiji/mesa3d/mesa3d/src/learnOpengl/build/CMakeFiles 0
+.PHONY : CMakeFiles/shaders_interpolation.dir/rule
+
+# Convenience name for target.
+shaders_interpolation: CMakeFiles/shaders_interpolation.dir/rule
+.PHONY : shaders_interpolation
+
+# clean rule for target.
+CMakeFiles/shaders_interpolation.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shaders_interpolation.dir/build.make CMakeFiles/shaders_interpolation.dir/clean
+.PHONY : CMakeFiles/shaders_interpolation.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/gpt_transform_feedback.dir
+
+# All Build rule for target.
+CMakeFiles/gpt_transform_feedback.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gpt_transform_feedback.dir/build.make CMakeFiles/gpt_transform_feedback.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gpt_transform_feedback.dir/build.make CMakeFiles/gpt_transform_feedback.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/shiji/mesa3d/mesa3d/src/learnOpengl/build/CMakeFiles --progress-num=16,17 "Built target gpt_transform_feedback"
+.PHONY : CMakeFiles/gpt_transform_feedback.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/gpt_transform_feedback.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/shiji/mesa3d/mesa3d/src/learnOpengl/build/CMakeFiles 2
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/gpt_transform_feedback.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/shiji/mesa3d/mesa3d/src/learnOpengl/build/CMakeFiles 0
+.PHONY : CMakeFiles/gpt_transform_feedback.dir/rule
+
+# Convenience name for target.
+gpt_transform_feedback: CMakeFiles/gpt_transform_feedback.dir/rule
+.PHONY : gpt_transform_feedback
+
+# clean rule for target.
+CMakeFiles/gpt_transform_feedback.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gpt_transform_feedback.dir/build.make CMakeFiles/gpt_transform_feedback.dir/clean
+.PHONY : CMakeFiles/gpt_transform_feedback.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.

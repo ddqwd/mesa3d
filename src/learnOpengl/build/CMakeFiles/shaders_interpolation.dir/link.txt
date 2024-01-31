@@ -1,0 +1,1 @@
+/usr/bin/c++ -g -rdynamic CMakeFiles/shaders_interpolation.dir/src/glad.c.o CMakeFiles/shaders_interpolation.dir/shaders_interpolation.cpp.o -o shaders_interpolation  -lglfw -lGL -lX11 -lpthread -lXrandr -lXi -ldl 

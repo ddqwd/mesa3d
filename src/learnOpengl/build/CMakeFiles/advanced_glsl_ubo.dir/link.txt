@@ -1,0 +1,1 @@
+/usr/bin/c++ -g -rdynamic CMakeFiles/advanced_glsl_ubo.dir/src/glad.c.o CMakeFiles/advanced_glsl_ubo.dir/advanced_glsl_ubo.cpp.o -o advanced_glsl_ubo  -lglfw -lGL -lX11 -lpthread -lXrandr -lXi -ldl 
