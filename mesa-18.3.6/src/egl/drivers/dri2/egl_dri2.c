@@ -850,6 +850,9 @@ dri2_setup_extensions(_EGLDisplay *disp)
    const struct dri2_extension_match *mandatory_core_extensions;
    const __DRIextension **extensions;
 
+   // gbm :
+   //-> driGetExtensions 
+   // dri_screen_extensions
    extensions = dri2_dpy->core->getExtensions(dri2_dpy->dri_screen);
 
    if (dri2_dpy->image_driver || dri2_dpy->dri2)
@@ -857,6 +860,7 @@ dri2_setup_extensions(_EGLDisplay *disp)
    else
       mandatory_core_extensions = swrast_core_extensions;
 
+   	//flush texbuffer image 
    if (!dri2_bind_extensions(dri2_dpy, mandatory_core_extensions, extensions, false))
       return EGL_FALSE;
 
@@ -910,6 +914,7 @@ dri2_initialize(_EGLDriver *drv, _EGLDisplay *disp)
       ret = dri2_initialize_x11(drv, disp);
       break;
    case _EGL_PLATFORM_DRM:
+	  // platform_drm.c
       ret = dri2_initialize_drm(drv, disp);
       break;
    case _EGL_PLATFORM_WAYLAND:
@@ -1316,6 +1321,8 @@ dri2_create_context(_EGLDriver *drv, _EGLDisplay *disp, _EGLConfig *conf,
       dri2_create_context_attribs_error(error);
    } else if (dri2_dpy->dri2) {
       if (dri2_dpy->dri2->base.version >= 3) {
+		// driDRI2Extension 
+		// driCreateNewContext
          dri2_ctx->dri_context =
             dri2_dpy->dri2->createContextAttribs(dri2_dpy->dri_screen,
                                                  api,
@@ -1513,6 +1520,8 @@ dri2_make_current(_EGLDriver *drv, _EGLDisplay *disp, _EGLSurface *dsurf,
 
    unbind = (cctx == NULL && ddraw == NULL && rdraw == NULL);
 
+   	// driCoreExtension
+	//driBindContext
    if (!unbind && !dri2_dpy->core->bindContext(cctx, ddraw, rdraw)) {
       /* undo the previous _eglBindContext */
       _eglBindContext(old_ctx, old_dsurf, old_rsurf, &ctx, &tmp_dsurf, &tmp_rsurf);
@@ -1589,6 +1598,8 @@ dri2_create_window_surface(_EGLDriver *drv, _EGLDisplay *dpy,
                            const EGLint *attrib_list)
 {
    struct dri2_egl_display *dri2_dpy = dri2_egl_display(dpy);
+   // dri2_drm_display_vtbl
+   //dri2_drm_create_window_surface
    return dri2_dpy->vtbl->create_window_surface(drv, dpy, conf, native_window,
                                                 attrib_list);
 }
@@ -1599,6 +1610,7 @@ dri2_create_pixmap_surface(_EGLDriver *drv, _EGLDisplay *dpy,
                            const EGLint *attrib_list)
 {
    struct dri2_egl_display *dri2_dpy = dri2_egl_display(dpy);
+   // dri2_drm_display_vtbl
    return dri2_dpy->vtbl->create_pixmap_surface(drv, dpy, conf, native_pixmap,
                                                 attrib_list);
 }
@@ -1835,6 +1847,8 @@ dri2_create_image(_EGLDriver *drv, _EGLDisplay *dpy, _EGLContext *ctx,
                   const EGLint *attr_list)
 {
    struct dri2_egl_display *dri2_dpy = dri2_egl_display(dpy);
+   // dri2_drm_display_vtbl
+   //dri2_drm_create_image_khr
    return dri2_dpy->vtbl->create_image(drv, dpy, ctx, target, buffer,
                                        attr_list);
 }
@@ -2508,6 +2522,7 @@ dri2_create_image_dma_buf(_EGLDisplay *disp, _EGLContext *ctx,
             NULL);
    }
    else {
+	   //dri2ImageExtension 
       dri_image =
          dri2_dpy->image->createImageFromDmaBufs(dri2_dpy->dri_screen,
             attrs.Width, attrs.Height, attrs.DMABufFourCC.Value,

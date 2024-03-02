@@ -172,6 +172,8 @@ dri2_drm_create_window_surface(_EGLDriver *drv, _EGLDisplay *disp,
    surf->dri_private = dri2_surf;
 
    if (dri2_dpy->dri2) {
+		// driDRI2Extension 
+		//driCreateNewDrawable
       dri2_surf->dri_drawable =
          dri2_dpy->dri2->createNewDrawable(dri2_dpy->dri_screen, config,
                                            dri2_surf->gbm_surf);

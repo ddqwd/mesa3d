@@ -470,6 +470,8 @@ driCreateContextAttribs(__DRIscreen *screen, int api,
     context->driDrawablePriv = NULL;
     context->driReadablePriv = NULL;
 
+	// galliumdrm_driver_api 
+	// dri_create_context
     if (!screen->driver->CreateContext(mesa_api, modes, context,
                                        &ctx_config, error, shareCtx)) {
         free(context);
@@ -576,6 +578,9 @@ static int driBindContext(__DRIcontext *pcp,
 	dri_get_drawable(prp);
     }
 
+
+	            //galliumdrm_driver_api 
+				//dri_make_current
     return pcp->driScreenPriv->driver->MakeCurrent(pcp, pdp, prp);
 }
 
@@ -688,6 +693,8 @@ driCreateNewDrawable(__DRIscreen *screen,
 
     dri_get_drawable(pdraw);
 
+	//galliumdrm_driver_api 
+	//dri2_create_buffer
     if (!screen->driver->CreateBuffer(screen, pdraw, &config->modes,
                                       GL_FALSE)) {
        free(pdraw);

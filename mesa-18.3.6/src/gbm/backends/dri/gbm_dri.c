@@ -132,6 +132,7 @@ image_get_buffers(__DRIdrawable *driDrawable,
    if (dri->image_get_buffers == NULL)
       return 0;
 
+   //dri2_drm_image_get_buffers
    return dri->image_get_buffers(driDrawable, format, stamp,
                                  surf->dri_private, buffer_mask, buffers);
 }
@@ -460,7 +461,12 @@ dri_screen_create_dri2(struct gbm_dri_device *dri, char *driver_name)
    if (dri->screen == NULL)
       return -1;
 
+   //-> driGetExtensions 
+   // dri_screen_extensions
    extensions = dri->core->getExtensions(dri->screen);
+   // dri2FenceExtension
+   // dri2ImageExtension
+   // dri2FlushExtension
    if (dri_bind_extensions(dri, dri_core_extensions, extensions) < 0) {
       ret = -1;
       goto free_screen;
@@ -1221,6 +1227,8 @@ gbm_dri_bo_create(struct gbm_device *gbm,
          assert(gbm_dri_bo_get_modifier(&bo->base) != DRM_FORMAT_MOD_INVALID);
       }
    } else {
+		// dri2ImageExtension 
+		//dri2_create_image
       bo->image = dri->image->createImage(dri->screen, width, height,
                                           dri_format, dri_use, bo);
    }

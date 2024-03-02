@@ -780,6 +780,7 @@ eglCreateContext(EGLDisplay dpy, EGLConfig config, EGLContext share_list,
    if (!share && share_list != EGL_NO_CONTEXT)
       RETURN_EGL_ERROR(disp, EGL_BAD_CONTEXT, EGL_NO_CONTEXT);
 
+	// dri2_create_context
    context = drv->API.CreateContext(drv, disp, conf, share, attrib_list);
    ret = (context) ? _eglLinkContext(context) : EGL_NO_CONTEXT;
 
@@ -857,6 +858,7 @@ eglMakeCurrent(EGLDisplay dpy, EGLSurface draw, EGLSurface read,
    if (read_surf && read_surf->Lost)
       RETURN_EGL_ERROR(disp, EGL_BAD_NATIVE_WINDOW, EGL_FALSE);
 
+// dri2_make_current
    ret = drv->API.MakeCurrent(drv, disp, draw_surf, read_surf, context);
 
    RETURN_EGL_EVAL(disp, ret);
@@ -917,6 +919,7 @@ _eglCreateWindowSurfaceCommon(_EGLDisplay *disp, EGLConfig config,
    if ((conf->SurfaceType & EGL_WINDOW_BIT) == 0)
       RETURN_EGL_ERROR(disp, EGL_BAD_MATCH, EGL_NO_SURFACE);
 
+// dri2_create_window_surface
    surf = drv->API.CreateWindowSurface(drv, disp, conf, native_window,
                                        attrib_list);
    ret = (surf) ? _eglLinkSurface(surf) : EGL_NO_SURFACE;

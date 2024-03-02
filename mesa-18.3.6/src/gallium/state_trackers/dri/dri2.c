@@ -569,6 +569,7 @@ dri_image_drawable_get_buffers(struct dri_drawable *drawable,
       }
    }
 
+// image_loader_extension 
    return (*sPriv->image.loader->getBuffers) (dPriv, image_format,
                                        (uint32_t *) &drawable->base.stamp,
                                        dPriv->loaderPrivate, buffer_mask,

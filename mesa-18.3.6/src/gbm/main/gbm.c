@@ -595,6 +595,7 @@ gbm_surface_create(struct gbm_device *gbm,
                    uint32_t width, uint32_t height,
 		   uint32_t format, uint32_t flags)
 {
+// gbm_dri_surface_create
    return gbm->surface_create(gbm, width, height, format, flags, NULL, 0);
 }
 
