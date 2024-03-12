@@ -1,0 +1,12 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-g",
+      "basicwin.c"
+    ],
+    "directory": "/home/shiji/mesa3d/mesa3d/src/x11/xlib",
+    "file": "/home/shiji/mesa3d/mesa3d/src/x11/xlib/basicwin.c"
+  }
+]

@@ -1,3 +1,5 @@
+[计算机图形学3](https://github.com/tiger8888/books-4/blob/master/%E3%80%8A%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9B%BE%E5%BD%A2%E5%AD%A6%E3%80%8B(%E7%AC%AC%E4%B8%89%E7%89%88).pdf)
+
 [amdgpu_basic](https://www.olcf.ornl.gov/wp-content/uploads/2019/10/ORNL_Application_Readiness_Workshop-AMD_GPU_Basics.pdf )
 
 [glsepcs](https://registry.khronos.org/OpenGL/specs/gl/)
@@ -29,3 +31,4 @@ https://www.researchgate.net/publication/200541445_The_LaTeX_Companion_2nd_ed/li
 
 https://ask.latexstudio.net/ask/article/608.html
 
+[physically-based-rendering-4] (https://ebin.pub/physically-based-rendering-fourth-edition-from-theory-to-implementation-4nbsped-2022014718-2022014719-9780262048026-9780262374033-9780262374040.html)
