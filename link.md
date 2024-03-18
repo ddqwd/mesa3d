@@ -9,6 +9,7 @@
 [x.org_docs](https://www.x.org/docs/)
 
 [xlib-programming ](https://www.niksula.hut.fi/~jkirma/books/xlib.pdf)
+[xcb-programming](https://www.x.org/releases/X11R7.6/doc/libxcb/tutorial/index.html)
 [opengl-programming-for-the-x-window-system](https://vdoc.pub/download/opengl-programming-for-the-x-window-system-pctmgj1om5k0)
 
 https://epdf.tips/queue/advanced-linux-3d-graphics-programming.html
