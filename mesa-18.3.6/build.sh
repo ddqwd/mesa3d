@@ -15,7 +15,7 @@ meson setup  build\
 	  -Dgallium-va=false \
 	  -Dgallium-xa=false \
 	  -Dgallium-nine=false \
-	  -Dgallium-opencl=disabled\
+	  -Dgallium-opencl=icd\
       -Dvulkan-drivers="amd" \
       -Dgles1=false \
       -Dgles2=false\

@@ -3,7 +3,7 @@
 
 https://www.nersc.gov/assets/pubs_presos/MattsonTutorialSC14.pdf
 
-https://registry.khronos.org/OpenCL/specs/opencl-1.1.pdf
+[opecl-1.1] (https://registry.khronos.org/OpenCL/specs/opencl-1.1.pdf)
 
 
 # OpenCL 1.1 规范
